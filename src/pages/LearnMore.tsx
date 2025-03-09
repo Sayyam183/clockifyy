@@ -53,6 +53,42 @@ const LearnMore = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
+      {/* Add CSS for animations */}
+      <style dangerouslySetInnerHTML={{ __html: `
+        .visible {
+          opacity: 1 !important;
+          transform: translateX(0) !important;
+          scale: 1 !important;
+        }
+        
+        .fade-in {
+          opacity: 0;
+          transition: opacity 0.5s ease-out;
+        }
+        
+        .slide-in-left {
+          opacity: 0;
+          transform: translateX(-50px);
+          transition: all 0.5s ease-out;
+        }
+        
+        .scale-in {
+          opacity: 0;
+          transform: scale(0.95);
+          transition: all 0.5s ease-out;
+        }
+        
+        .bounce {
+          animation: bounce 1s ease-in-out;
+        }
+        
+        @keyframes bounce {
+          0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+          40% { transform: translateY(-20px); }
+          60% { transform: translateY(-10px); }
+        }
+      `}} />
+      
       <Navbar />
       
       {/* Hero Section */}
@@ -156,10 +192,11 @@ const LearnMore = () => {
               <p className="text-gray-700 mb-6">
                 Start with our professionally designed schedules tailored specifically for teenagers' unique needs and challenges.
               </p>
-              <Link to="/schedules" onClick={() => window.scrollTo(0, 0)}>
+              <Link to="/schedules">
                 <Button 
                   size="lg" 
                   className="bg-clockify-blue hover:bg-clockify-darkBlue transition-all duration-300 transform hover:scale-105"
+                  onClick={() => window.scrollTo(0, 0)}
                 >
                   Browse Schedules
                 </Button>
@@ -173,13 +210,5 @@ const LearnMore = () => {
     </div>
   );
 };
-
-// CSS in JSX
-const styles = `
-  .visible {
-    opacity: 1;
-    transform: translateX(0);
-  }
-`;
 
 export default LearnMore;

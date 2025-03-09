@@ -20,15 +20,17 @@ const Navbar = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
-  const handleGetStarted = (e) => {
+  // Function to handle navigation and ensure scroll to top
+  const handleNavigation = (path: string) => (e: React.MouseEvent) => {
     e.preventDefault();
-    navigate("/schedules");
+    navigate(path);
     window.scrollTo(0, 0);
   };
 
-  // Function to handle navigation and scroll to top
-  const handleNavigation = (path: string) => {
-    navigate(path);
+  // Function for the get started button
+  const handleGetStarted = (e: React.MouseEvent) => {
+    e.preventDefault();
+    navigate("/schedules");
     window.scrollTo(0, 0);
   };
 
@@ -40,7 +42,7 @@ const Navbar = () => {
             <Link 
               to="/" 
               className="flex items-center cursor-pointer transition-transform hover:scale-105"
-              onClick={() => window.scrollTo(0, 0)}
+              onClick={handleNavigation("/")}
             >
               <Clock className="h-8 w-8 text-clockify-blue" />
               <span className="ml-2 text-xl font-bold text-clockify-darkBlue">
@@ -54,35 +56,35 @@ const Navbar = () => {
             <Link 
               to="/" 
               className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-clockify-blue transition-all hover:scale-105"
-              onClick={() => window.scrollTo(0, 0)}
+              onClick={handleNavigation("/")}
             >
               Home
             </Link>
             <Link 
               to="/tips" 
               className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-clockify-blue transition-all hover:scale-105"
-              onClick={() => window.scrollTo(0, 0)}
+              onClick={handleNavigation("/tips")}
             >
               Tips
             </Link>
             <Link 
               to="/schedules" 
               className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-clockify-blue transition-all hover:scale-105"
-              onClick={() => window.scrollTo(0, 0)}
+              onClick={handleNavigation("/schedules")}
             >
               Schedules
             </Link>
             <Link 
               to="/reviews" 
               className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-clockify-blue transition-all hover:scale-105"
-              onClick={() => window.scrollTo(0, 0)}
+              onClick={handleNavigation("/reviews")}
             >
               Reviews
             </Link>
             <Link 
               to="/faq" 
               className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-clockify-blue transition-all hover:scale-105"
-              onClick={() => window.scrollTo(0, 0)}
+              onClick={handleNavigation("/faq")}
             >
               FAQ
             </Link>
@@ -125,40 +127,47 @@ const Navbar = () => {
             <Link 
               to="/" 
               className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-clockify-blue transition-colors"
-              onClick={() => window.scrollTo(0, 0)}
+              onClick={handleNavigation("/")}
             >
               Home
             </Link>
             <Link 
               to="/tips" 
               className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-clockify-blue transition-colors"
-              onClick={() => window.scrollTo(0, 0)}
+              onClick={handleNavigation("/tips")}
             >
               Tips
             </Link>
             <Link 
               to="/schedules" 
               className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-clockify-blue transition-colors"
-              onClick={() => window.scrollTo(0, 0)}
+              onClick={handleNavigation("/schedules")}
             >
               Schedules
             </Link>
             <Link 
               to="/reviews" 
               className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-clockify-blue transition-colors"
-              onClick={() => window.scrollTo(0, 0)}
+              onClick={handleNavigation("/reviews")}
             >
               Reviews
             </Link>
             <Link 
               to="/faq" 
               className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-clockify-blue transition-colors"
-              onClick={() => window.scrollTo(0, 0)}
+              onClick={handleNavigation("/faq")}
             >
               FAQ
             </Link>
+            <Link
+              to="/learn-more"
+              className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-clockify-blue transition-colors"
+              onClick={handleNavigation("/learn-more")}
+            >
+              Learn More
+            </Link>
             <Button 
-              className="w-full mt-4 bg-clockify-blue hover:bg-clockify-darkBlue transition-transform"
+              className="w-full mt-4 bg-clockify-blue hover:bg-clockify-darkBlue transition-transform hover:scale-105"
               onClick={handleGetStarted}
             >
               Get Started

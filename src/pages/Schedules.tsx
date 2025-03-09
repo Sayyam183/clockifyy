@@ -162,12 +162,62 @@ const Schedules = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
+      {/* Add CSS for animations */}
+      <style dangerouslySetInnerHTML={{ __html: `
+        .fade-in {
+          opacity: 0;
+          animation: fadeIn 0.5s ease-out forwards;
+        }
+        
+        .slide-in-left {
+          opacity: 0;
+          transform: translateX(-50px);
+          animation: slideInLeft 0.5s ease-out forwards;
+        }
+        
+        .bounce {
+          animation: bounce 1s ease-in-out;
+        }
+        
+        .scale-in {
+          opacity: 0;
+          transform: scale(0.95);
+          animation: scaleIn 0.5s ease-out forwards;
+        }
+        
+        @keyframes fadeIn {
+          to { opacity: 1; }
+        }
+        
+        @keyframes slideInLeft {
+          to { opacity: 1; transform: translateX(0); }
+        }
+        
+        @keyframes bounce {
+          0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+          40% { transform: translateY(-20px); }
+          60% { transform: translateY(-10px); }
+        }
+        
+        @keyframes scaleIn {
+          to { opacity: 1; transform: scale(1); }
+        }
+        
+        .hover-scale {
+          transition: transform 0.3s ease;
+        }
+        
+        .hover-scale:hover {
+          transform: scale(1.05);
+        }
+      `}} />
+      
       <Navbar />
       
       {/* Hero Section */}
       <section className="bg-gradient-to-r from-clockify-blue to-clockify-lightBlue py-12">
         <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-white ${isLoaded ? 'fade-in' : 'opacity-0'}`}>
-          <h1 className="text-3xl md:text-4xl font-bold mb-4">
+          <h1 className="text-3xl md:text-4xl font-bold mb-4 bounce">
             Ready-Made Schedules
           </h1>
           <p className="text-xl max-w-3xl mx-auto">
@@ -189,7 +239,7 @@ const Schedules = () => {
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-            <Button className="bg-clockify-blue hover:bg-clockify-darkBlue bounce">
+            <Button className="bg-clockify-blue hover:bg-clockify-darkBlue bounce hover:scale-105 transition-transform">
               Create New Schedule
             </Button>
           </div>
@@ -202,7 +252,7 @@ const Schedules = () => {
           <Tabs defaultValue="All">
             <TabsList className="mb-8">
               {categories.map((category) => (
-                <TabsTrigger key={category} value={category}>{category}</TabsTrigger>
+                <TabsTrigger key={category} value={category} className="hover-scale">{category}</TabsTrigger>
               ))}
             </TabsList>
             
@@ -214,7 +264,7 @@ const Schedules = () => {
                     .map((schedule, index) => (
                       <div 
                         key={schedule.id} 
-                        className={`${isLoaded ? 'scale-in' : 'opacity-0'}`} 
+                        className={`${isLoaded ? 'scale-in hover-scale' : 'opacity-0'}`} 
                         style={{ animationDelay: `${0.5 + (index * 0.1)}s` }}
                       >
                         <ScheduleCard

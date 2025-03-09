@@ -146,6 +146,56 @@ const FAQ = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
+      {/* Add CSS for animations */}
+      <style dangerouslySetInnerHTML={{ __html: `
+        .fade-in {
+          opacity: 0;
+          animation: fadeIn 0.5s ease-out forwards;
+        }
+        
+        .slide-in-left {
+          opacity: 0;
+          transform: translateX(-50px);
+          animation: slideInLeft 0.5s ease-out forwards;
+        }
+        
+        .bounce {
+          animation: bounce 1s ease-in-out;
+        }
+        
+        .scale-in {
+          opacity: 0;
+          transform: scale(0.95);
+          animation: scaleIn 0.5s ease-out forwards;
+        }
+        
+        @keyframes fadeIn {
+          to { opacity: 1; }
+        }
+        
+        @keyframes slideInLeft {
+          to { opacity: 1; transform: translateX(0); }
+        }
+        
+        @keyframes bounce {
+          0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+          40% { transform: translateY(-20px); }
+          60% { transform: translateY(-10px); }
+        }
+        
+        @keyframes scaleIn {
+          to { opacity: 1; transform: scale(1); }
+        }
+        
+        .hover-scale {
+          transition: transform 0.3s ease;
+        }
+        
+        .hover-scale:hover {
+          transform: scale(1.05);
+        }
+      `}} />
+      
       <Navbar />
       
       {/* Hero Section */}
@@ -168,10 +218,10 @@ const FAQ = () => {
               <AccordionItem 
                 key={index} 
                 value={`item-${index}`} 
-                className={`${isLoaded ? 'scale-in' : 'opacity-0'}`}
+                className={`${isLoaded ? 'scale-in hover-scale' : 'opacity-0'}`}
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
-                <AccordionTrigger className="text-left font-medium text-lg">
+                <AccordionTrigger className="text-left font-medium text-lg hover:text-clockify-blue transition-colors">
                   {faq.question}
                 </AccordionTrigger>
                 <AccordionContent className="text-gray-700">
@@ -193,14 +243,14 @@ const FAQ = () => {
           <div className="flex flex-col sm:flex-row justify-center gap-4">
             <a 
               href="mailto:support@clockify.com" 
-              className="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-white bg-clockify-blue hover:bg-clockify-darkBlue scale-in"
+              className="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-white bg-clockify-blue hover:bg-clockify-darkBlue scale-in hover-scale"
               style={{ animationDelay: '0.3s' }}
             >
               Email Support
             </a>
             <Button 
               onClick={handleChatOpen} 
-              className="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-clockify-blue bg-white hover:bg-gray-50 scale-in"
+              className="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-clockify-blue bg-white hover:bg-gray-50 scale-in hover-scale"
               style={{ animationDelay: '0.4s' }}
             >
               <MessageCircle className="mr-2 h-5 w-5" />
@@ -246,7 +296,7 @@ const FAQ = () => {
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyPress={handleKeyPress}
               />
-              <Button onClick={handleMessageSend}>
+              <Button onClick={handleMessageSend} className="hover-scale">
                 <Send className="h-4 w-4" />
               </Button>
             </div>

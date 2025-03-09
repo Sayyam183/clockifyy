@@ -122,6 +122,48 @@ const Reviews = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
+      {/* Add CSS for animations */}
+      <style dangerouslySetInnerHTML={{ __html: `
+        .fade-in {
+          opacity: 0;
+          animation: fadeIn 0.5s ease-out forwards;
+        }
+        
+        .slide-in-left {
+          opacity: 0;
+          transform: translateX(-50px);
+          animation: slideInLeft 0.5s ease-out forwards;
+        }
+        
+        .bounce {
+          animation: bounce 1s ease-in-out;
+        }
+        
+        .scale-in {
+          opacity: 0;
+          transform: scale(0.95);
+          animation: scaleIn 0.5s ease-out forwards;
+        }
+        
+        @keyframes fadeIn {
+          to { opacity: 1; }
+        }
+        
+        @keyframes slideInLeft {
+          to { opacity: 1; transform: translateX(0); }
+        }
+        
+        @keyframes bounce {
+          0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+          40% { transform: translateY(-20px); }
+          60% { transform: translateY(-10px); }
+        }
+        
+        @keyframes scaleIn {
+          to { opacity: 1; transform: scale(1); }
+        }
+      `}} />
+      
       <Navbar />
       
       {/* Hero Section */}
@@ -152,7 +194,7 @@ const Reviews = () => {
                 className={`${isLoaded ? 'slide-in-left' : 'opacity-0'}`}
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
-                <Card className="hover:shadow-md transition-shadow">
+                <Card className="hover:shadow-md transition-shadow hover:scale-105 duration-300">
                   <CardContent className="pt-6">
                     <div className="flex items-start">
                       <Avatar className="h-12 w-12 border-2 border-clockify-blue">
@@ -185,7 +227,7 @@ const Reviews = () => {
         <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 ${isLoaded ? 'scale-in' : 'opacity-0'}`} style={{ animationDelay: '1s' }}>
           <h2 className="text-2xl font-bold mb-8 text-center">From Parents</h2>
           <div className="grid md:grid-cols-2 gap-6">
-            <Card className="hover:shadow-md transition-shadow bounce">
+            <Card className="hover:shadow-md transition-shadow bounce hover:scale-105 duration-300">
               <CardContent className="pt-6">
                 <p className="italic text-gray-700">
                   "As a parent, I was looking for ways to help my daughter manage her time better without constantly nagging her. Clockify has been that solution. She's more independent and responsible now, and our relationship has improved without the constant stress over homework and deadlines."
@@ -202,7 +244,7 @@ const Reviews = () => {
               </CardContent>
             </Card>
             
-            <Card className="hover:shadow-md transition-shadow bounce" style={{ animationDelay: '0.2s' }}>
+            <Card className="hover:shadow-md transition-shadow bounce hover:scale-105 duration-300" style={{ animationDelay: '0.2s' }}>
               <CardContent className="pt-6">
                 <p className="italic text-gray-700">
                   "My son has always struggled with organization, especially since starting high school. The structured schedules from Clockify have given him a framework that works. His grades have improved, and he even has more free time because he's working more efficiently."
