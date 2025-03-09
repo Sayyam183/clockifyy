@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -6,7 +5,12 @@ import ScheduleCard, { ScheduleItem } from "@/components/ScheduleCard";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search } from "lucide-react";
+import { Search, Plus, Save } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { toast } from "sonner";
 
 interface Schedule {
   id: number;
@@ -20,19 +24,7 @@ interface Schedule {
 const Schedules = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [isLoaded, setIsLoaded] = useState(false);
-  
-  useEffect(() => {
-    // Preload content before showing animations
-    document.body.style.opacity = '1';
-    
-    // Set isLoaded to true immediately on mount
-    setIsLoaded(true);
-    
-    // Scroll to top on page load
-    window.scrollTo(0, 0);
-  }, []);
-  
-  const schedules: Schedule[] = [
+  const [schedules, setSchedules] = useState<Schedule[]>([
     {
       id: 1,
       title: "Balanced School Day",
@@ -154,7 +146,104 @@ const Schedules = () => {
         { time: "10:30 PM", activity: "Sleep" }
       ]
     }
-  ];
+  ]);
+  
+  const [newSchedule, setNewSchedule] = useState<Schedule>({
+    id: Date.now(),
+    title: "",
+    description: "",
+    category: "Study",
+    difficulty: "Medium",
+    scheduleItems: [
+      { time: "8:00 AM", activity: "Wake up" },
+      { time: "9:00 AM", activity: "Start activity" }
+    ]
+  });
+  
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  
+  useEffect(() => {
+    document.body.style.opacity = '1';
+    setIsLoaded(true);
+    window.scrollTo(0, 0);
+  }, []);
+  
+  const handleCreateSchedule = () => {
+    if (!newSchedule.title.trim()) {
+      toast.error("Please add a title for your schedule");
+      return;
+    }
+    
+    if (!newSchedule.description.trim()) {
+      toast.error("Please add a description for your schedule");
+      return;
+    }
+    
+    if (newSchedule.scheduleItems.length < 2) {
+      toast.error("Please add at least two activities to your schedule");
+      return;
+    }
+    
+    setSchedules([
+      {
+        ...newSchedule,
+        id: Date.now()
+      },
+      ...schedules
+    ]);
+    
+    setNewSchedule({
+      id: Date.now(),
+      title: "",
+      description: "",
+      category: "Study",
+      difficulty: "Medium",
+      scheduleItems: [
+        { time: "8:00 AM", activity: "Wake up" },
+        { time: "9:00 AM", activity: "Start activity" }
+      ]
+    });
+    
+    setIsCreateDialogOpen(false);
+    
+    toast.success("New schedule created successfully!");
+  };
+  
+  const addNewTimeSlot = () => {
+    setNewSchedule({
+      ...newSchedule,
+      scheduleItems: [
+        ...newSchedule.scheduleItems,
+        { time: "", activity: "" }
+      ]
+    });
+  };
+  
+  const updateTimeSlot = (index: number, field: 'time' | 'activity', value: string) => {
+    const updatedItems = [...newSchedule.scheduleItems];
+    updatedItems[index] = { 
+      ...updatedItems[index], 
+      [field]: value 
+    };
+    
+    setNewSchedule({
+      ...newSchedule,
+      scheduleItems: updatedItems
+    });
+  };
+  
+  const removeTimeSlot = (index: number) => {
+    if (newSchedule.scheduleItems.length <= 2) {
+      toast.error("A schedule needs at least two activities");
+      return;
+    }
+    
+    const updatedItems = newSchedule.scheduleItems.filter((_, i) => i !== index);
+    setNewSchedule({
+      ...newSchedule,
+      scheduleItems: updatedItems
+    });
+  };
 
   const filteredSchedules = schedules.filter(schedule => 
     schedule.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -166,7 +255,6 @@ const Schedules = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Add CSS for unique schedule animations */}
       <style dangerouslySetInnerHTML={{ __html: `
         .schedule-fade-in {
           opacity: 0;
@@ -219,7 +307,6 @@ const Schedules = () => {
       
       <Navbar />
       
-      {/* Hero Section with unique animation */}
       <section className="bg-gradient-to-r from-clockify-blue to-clockify-lightBlue py-12">
         <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-white ${isLoaded ? 'schedule-fade-in' : 'opacity-0'}`}>
           <h1 className="text-3xl md:text-4xl font-bold mb-4 schedule-rotate-in" style={{animationDelay: '0.1s'}}>
@@ -231,7 +318,6 @@ const Schedules = () => {
         </div>
       </section>
       
-      {/* Search Section */}
       <section className="py-8 bg-white">
         <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 ${isLoaded ? 'schedule-slide-from-top' : 'opacity-0'}`} style={{ animationDelay: '0.5s' }}>
           <div className="flex flex-col md:flex-row gap-4">
@@ -244,14 +330,135 @@ const Schedules = () => {
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-            <Button className="bg-clockify-blue hover:bg-clockify-darkBlue schedule-rotate-in hover:scale-105 transition-transform" style={{animationDelay: '0.7s'}}>
-              Create New Schedule
-            </Button>
+            
+            <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+              <DialogTrigger asChild>
+                <Button className="bg-clockify-blue hover:bg-clockify-darkBlue schedule-rotate-in hover:scale-105 transition-transform" style={{animationDelay: '0.7s'}}>
+                  <Plus className="mr-1" /> Create New Schedule
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>Create New Schedule</DialogTitle>
+                  <DialogDescription>
+                    Fill in the details below to create your custom schedule.
+                  </DialogDescription>
+                </DialogHeader>
+                
+                <div className="space-y-6 py-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="title">Schedule Title</Label>
+                    <Input 
+                      id="title" 
+                      placeholder="E.g., Morning Study Routine" 
+                      value={newSchedule.title}
+                      onChange={(e) => setNewSchedule({...newSchedule, title: e.target.value})}
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="description">Description</Label>
+                    <Textarea 
+                      id="description" 
+                      placeholder="Describe what this schedule is for..." 
+                      value={newSchedule.description}
+                      onChange={(e) => setNewSchedule({...newSchedule, description: e.target.value})}
+                    />
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="category">Category</Label>
+                      <Select 
+                        value={newSchedule.category}
+                        onValueChange={(value) => setNewSchedule({...newSchedule, category: value})}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select category" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Study">Study</SelectItem>
+                          <SelectItem value="School">School</SelectItem>
+                          <SelectItem value="Sports">Sports</SelectItem>
+                          <SelectItem value="Arts">Arts</SelectItem>
+                          <SelectItem value="Work">Work</SelectItem>
+                          <SelectItem value="Personal">Personal</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="difficulty">Difficulty</Label>
+                      <Select 
+                        value={newSchedule.difficulty}
+                        onValueChange={(value: "Easy" | "Medium" | "Hard") => setNewSchedule({...newSchedule, difficulty: value})}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select difficulty" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Easy">Easy</SelectItem>
+                          <SelectItem value="Medium">Medium</SelectItem>
+                          <SelectItem value="Hard">Hard</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <Label>Schedule Activities</Label>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={addNewTimeSlot}
+                        className="flex items-center gap-1"
+                      >
+                        <Plus className="h-4 w-4" /> Add Activity
+                      </Button>
+                    </div>
+                    
+                    <div className="space-y-3 max-h-[30vh] overflow-y-auto p-2">
+                      {newSchedule.scheduleItems.map((item, index) => (
+                        <div key={index} className="flex gap-3 items-center">
+                          <Input 
+                            placeholder="Time" 
+                            className="w-1/3"
+                            value={item.time}
+                            onChange={(e) => updateTimeSlot(index, 'time', e.target.value)}
+                          />
+                          <Input 
+                            placeholder="Activity" 
+                            className="flex-1"
+                            value={item.activity}
+                            onChange={(e) => updateTimeSlot(index, 'activity', e.target.value)}
+                          />
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                            onClick={() => removeTimeSlot(index)}
+                          >
+                            ✕
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  <Button 
+                    className="w-full bg-clockify-blue hover:bg-clockify-darkBlue"
+                    onClick={handleCreateSchedule}
+                  >
+                    <Save className="mr-2 h-4 w-4" /> Create Schedule
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
       </section>
       
-      {/* Schedules Section */}
       <section className="py-8 bg-clockify-lightGray flex-grow">
         <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 ${isLoaded ? 'schedule-fade-in' : 'opacity-0'}`} style={{ animationDelay: '0.9s' }}>
           <Tabs defaultValue="All">
