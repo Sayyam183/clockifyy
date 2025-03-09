@@ -13,7 +13,7 @@ const Index = () => {
   useEffect(() => {
     // Set isLoaded to true after a short delay to trigger animations
     setTimeout(() => {
-      setIsLoaded(true;
+      setIsLoaded(true);
     }, 100);
     
     // Smooth scroll behavior for the page
