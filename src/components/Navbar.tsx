@@ -16,20 +16,59 @@ const Navbar = () => {
     window.scrollTo(0, 0);
   }, [location.pathname]);
 
+  // Pre-cache critical pages for faster navigation
+  useEffect(() => {
+    // Create link prefetch elements for main routes
+    const routes = ["/", "/tips", "/schedules", "/reviews", "/faq", "/learn-more"];
+    
+    // Create a hidden prefetch link for each route
+    routes.forEach(route => {
+      const link = document.createElement('link');
+      link.rel = 'prefetch';
+      link.href = route;
+      link.as = 'document';
+      document.head.appendChild(link);
+    });
+    
+    // Set page transition style to prevent white flash
+    const style = document.createElement('style');
+    style.textContent = `
+      body { 
+        transition: opacity 0.2s ease;
+        opacity: 1;
+      }
+    `;
+    document.head.appendChild(style);
+    
+    return () => {
+      // Clean up
+      document.querySelectorAll('link[rel="prefetch"]').forEach(el => el.remove());
+      style.remove();
+    };
+  }, []);
+
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
-  // Function to handle navigation and ensure scroll to top
+  // Function to handle navigation and ensure quick page transitions
   const handleNavigation = (path: string) => (e: React.MouseEvent) => {
     e.preventDefault();
-    navigate(path);
-    window.scrollTo(0, 0);
+    
+    // Only apply transition if navigating to a different page
+    if (location.pathname !== path) {
+      // Set opacity to 1 immediately to prevent flash
+      document.body.style.opacity = '1';
+      
+      navigate(path);
+      window.scrollTo(0, 0);
+    }
   };
 
   // Function for the get started button
   const handleGetStarted = (e: React.MouseEvent) => {
     e.preventDefault();
+    document.body.style.opacity = '1';
     navigate("/schedules");
     window.scrollTo(0, 0);
   };

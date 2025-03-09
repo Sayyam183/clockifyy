@@ -24,12 +24,16 @@ const FAQ = () => {
   const [isLoaded, setIsLoaded] = useState(false);
   const { toast } = useToast();
   
-  // Set animation state
+  // Set animation state immediately
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoaded(true);
-    }, 100);
-    return () => clearTimeout(timer);
+    // Preload content before showing animations
+    document.body.style.opacity = '1';
+    
+    // Set isLoaded to true immediately on mount
+    setIsLoaded(true);
+    
+    // Scroll to top on page load
+    window.scrollTo(0, 0);
   }, []);
   
   // Auto-scroll to bottom of chat
@@ -146,71 +150,74 @@ const FAQ = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Add CSS for animations */}
+      {/* Add CSS for unique FAQ animations */}
       <style dangerouslySetInnerHTML={{ __html: `
-        .fade-in {
+        .faq-fade-in {
           opacity: 0;
-          animation: fadeIn 0.5s ease-out forwards;
+          animation: faqFadeIn 0.7s ease-out forwards;
         }
         
-        .slide-in-left {
+        .faq-swing-in {
           opacity: 0;
-          transform: translateX(-50px);
-          animation: slideInLeft 0.5s ease-out forwards;
+          transform: rotateY(-10deg) translateX(-20px);
+          transform-origin: left;
+          animation: faqSwingIn 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
         }
         
-        .bounce {
-          animation: bounce 1s ease-in-out;
-        }
-        
-        .scale-in {
+        .faq-slide-up-fade {
           opacity: 0;
-          transform: scale(0.95);
-          animation: scaleIn 0.5s ease-out forwards;
+          transform: translateY(20px);
+          animation: faqSlideUpFade 0.7s ease-out forwards;
         }
         
-        @keyframes fadeIn {
+        .faq-expand {
+          max-width: 0;
+          opacity: 0;
+          animation: faqExpand 0.8s ease-out forwards;
+        }
+        
+        @keyframes faqFadeIn {
           to { opacity: 1; }
         }
         
-        @keyframes slideInLeft {
-          to { opacity: 1; transform: translateX(0); }
+        @keyframes faqSwingIn {
+          to { opacity: 1; transform: rotateY(0) translateX(0); }
         }
         
-        @keyframes bounce {
-          0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-          40% { transform: translateY(-20px); }
-          60% { transform: translateY(-10px); }
+        @keyframes faqSlideUpFade {
+          to { opacity: 1; transform: translateY(0); }
         }
         
-        @keyframes scaleIn {
-          to { opacity: 1; transform: scale(1); }
+        @keyframes faqExpand {
+          to { opacity: 1; max-width: 100%; }
         }
         
-        .hover-scale {
-          transition: transform 0.3s ease;
+        .faq-item-hover {
+          transition: all 0.3s ease;
         }
         
-        .hover-scale:hover {
-          transform: scale(1.05);
+        .faq-item-hover:hover {
+          transform: translateX(8px);
+          box-shadow: -4px 0 0 0 #8B5CF6;
+          padding-left: 8px;
         }
       `}} />
       
       <Navbar />
       
-      {/* Hero Section */}
+      {/* Hero Section with unique animations */}
       <section className="bg-gradient-to-r from-clockify-blue to-clockify-lightBlue py-12">
-        <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-white ${isLoaded ? 'fade-in' : 'opacity-0'}`}>
-          <h1 className="text-3xl md:text-4xl font-bold mb-4 bounce">
+        <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-white ${isLoaded ? 'faq-fade-in' : 'opacity-0'}`}>
+          <h1 className="text-3xl md:text-4xl font-bold mb-4 faq-swing-in" style={{animationDelay: '0.1s'}}>
             Frequently Asked Questions
           </h1>
-          <p className="text-xl max-w-3xl mx-auto slide-in-left">
+          <p className="text-xl max-w-3xl mx-auto faq-slide-up-fade" style={{animationDelay: '0.3s'}}>
             Find answers to common questions about Clockify and time management for teens.
           </p>
         </div>
       </section>
       
-      {/* FAQ Section */}
+      {/* FAQ Section with staggered animations */}
       <section className="py-12 bg-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <Accordion type="single" collapsible className="w-full">
@@ -218,8 +225,8 @@ const FAQ = () => {
               <AccordionItem 
                 key={index} 
                 value={`item-${index}`} 
-                className={`${isLoaded ? 'scale-in hover-scale' : 'opacity-0'}`}
-                style={{ animationDelay: `${index * 0.1}s` }}
+                className={`${isLoaded ? 'faq-slide-up-fade faq-item-hover' : 'opacity-0'}`}
+                style={{ animationDelay: `${0.4 + (index * 0.1)}s` }}
               >
                 <AccordionTrigger className="text-left font-medium text-lg hover:text-clockify-blue transition-colors">
                   {faq.question}
@@ -235,23 +242,23 @@ const FAQ = () => {
       
       {/* Contact Section */}
       <section className="py-12 bg-clockify-lightGray">
-        <div className={`max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center ${isLoaded ? 'scale-in' : 'opacity-0'}`}>
-          <h2 className="text-2xl font-bold mb-4 bounce">Still Have Questions?</h2>
-          <p className="text-lg text-gray-700 mb-6 slide-in-left">
+        <div className={`max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center ${isLoaded ? 'faq-swing-in' : 'opacity-0'}`} style={{animationDelay: '0.6s'}}>
+          <h2 className="text-2xl font-bold mb-4 faq-swing-in" style={{animationDelay: '0.7s'}}>Still Have Questions?</h2>
+          <p className="text-lg text-gray-700 mb-6 faq-slide-up-fade" style={{animationDelay: '0.8s'}}>
             We're here to help! Reach out to our support team for assistance.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
             <a 
               href="mailto:support@clockify.com" 
-              className="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-white bg-clockify-blue hover:bg-clockify-darkBlue scale-in hover-scale"
-              style={{ animationDelay: '0.3s' }}
+              className="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-white bg-clockify-blue hover:bg-clockify-darkBlue faq-expand faq-item-hover"
+              style={{ animationDelay: '0.9s' }}
             >
               Email Support
             </a>
             <Button 
               onClick={handleChatOpen} 
-              className="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-clockify-blue bg-white hover:bg-gray-50 scale-in hover-scale"
-              style={{ animationDelay: '0.4s' }}
+              className="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-clockify-blue bg-white hover:bg-gray-50 faq-expand faq-item-hover"
+              style={{ animationDelay: '1s' }}
             >
               <MessageCircle className="mr-2 h-5 w-5" />
               Live Chat

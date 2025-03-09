@@ -22,10 +22,14 @@ const Schedules = () => {
   const [isLoaded, setIsLoaded] = useState(false);
   
   useEffect(() => {
-    // Set isLoaded to true after a short delay to trigger animations
-    setTimeout(() => {
-      setIsLoaded(true);
-    }, 300);
+    // Preload content before showing animations
+    document.body.style.opacity = '1';
+    
+    // Set isLoaded to true immediately on mount
+    setIsLoaded(true);
+    
+    // Scroll to top on page load
+    window.scrollTo(0, 0);
   }, []);
   
   const schedules: Schedule[] = [
@@ -162,65 +166,66 @@ const Schedules = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Add CSS for animations */}
+      {/* Add CSS for unique schedule animations */}
       <style dangerouslySetInnerHTML={{ __html: `
-        .fade-in {
+        .schedule-fade-in {
           opacity: 0;
-          animation: fadeIn 0.5s ease-out forwards;
+          animation: scheduleFadeIn 0.7s ease-out forwards;
         }
         
-        .slide-in-left {
+        .schedule-slide-from-top {
           opacity: 0;
-          transform: translateX(-50px);
-          animation: slideInLeft 0.5s ease-out forwards;
+          transform: translateY(-30px);
+          animation: scheduleSlideFromTop 0.6s ease-out forwards;
         }
         
-        .bounce {
-          animation: bounce 1s ease-in-out;
-        }
-        
-        .scale-in {
+        .schedule-rotate-in {
           opacity: 0;
-          transform: scale(0.95);
-          animation: scaleIn 0.5s ease-out forwards;
+          transform: rotateX(-10deg);
+          animation: scheduleRotateIn 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
         }
         
-        @keyframes fadeIn {
+        .schedule-zoom-in {
+          opacity: 0;
+          transform: scale(0.9);
+          animation: scheduleZoomIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+        
+        @keyframes scheduleFadeIn {
           to { opacity: 1; }
         }
         
-        @keyframes slideInLeft {
-          to { opacity: 1; transform: translateX(0); }
+        @keyframes scheduleSlideFromTop {
+          to { opacity: 1; transform: translateY(0); }
         }
         
-        @keyframes bounce {
-          0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-          40% { transform: translateY(-20px); }
-          60% { transform: translateY(-10px); }
+        @keyframes scheduleRotateIn {
+          to { opacity: 1; transform: rotateX(0); }
         }
         
-        @keyframes scaleIn {
+        @keyframes scheduleZoomIn {
           to { opacity: 1; transform: scale(1); }
         }
         
-        .hover-scale {
-          transition: transform 0.3s ease;
+        .hover-grow {
+          transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
         
-        .hover-scale:hover {
-          transform: scale(1.05);
+        .hover-grow:hover {
+          transform: translateY(-5px) scale(1.02);
+          box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
         }
       `}} />
       
       <Navbar />
       
-      {/* Hero Section */}
+      {/* Hero Section with unique animation */}
       <section className="bg-gradient-to-r from-clockify-blue to-clockify-lightBlue py-12">
-        <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-white ${isLoaded ? 'fade-in' : 'opacity-0'}`}>
-          <h1 className="text-3xl md:text-4xl font-bold mb-4 bounce">
+        <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-white ${isLoaded ? 'schedule-fade-in' : 'opacity-0'}`}>
+          <h1 className="text-3xl md:text-4xl font-bold mb-4 schedule-rotate-in" style={{animationDelay: '0.1s'}}>
             Ready-Made Schedules
           </h1>
-          <p className="text-xl max-w-3xl mx-auto">
+          <p className="text-xl max-w-3xl mx-auto schedule-slide-from-top" style={{animationDelay: '0.3s'}}>
             Browse our collection of schedules designed for teens. Find one that matches your needs or customize it to make it your own.
           </p>
         </div>
@@ -228,7 +233,7 @@ const Schedules = () => {
       
       {/* Search Section */}
       <section className="py-8 bg-white">
-        <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 ${isLoaded ? 'slide-in-left' : 'opacity-0'}`} style={{ animationDelay: '0.2s' }}>
+        <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 ${isLoaded ? 'schedule-slide-from-top' : 'opacity-0'}`} style={{ animationDelay: '0.5s' }}>
           <div className="flex flex-col md:flex-row gap-4">
             <div className="relative flex-grow">
               <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
@@ -239,7 +244,7 @@ const Schedules = () => {
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-            <Button className="bg-clockify-blue hover:bg-clockify-darkBlue bounce hover:scale-105 transition-transform">
+            <Button className="bg-clockify-blue hover:bg-clockify-darkBlue schedule-rotate-in hover:scale-105 transition-transform" style={{animationDelay: '0.7s'}}>
               Create New Schedule
             </Button>
           </div>
@@ -248,11 +253,11 @@ const Schedules = () => {
       
       {/* Schedules Section */}
       <section className="py-8 bg-clockify-lightGray flex-grow">
-        <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 ${isLoaded ? 'scale-in' : 'opacity-0'}`} style={{ animationDelay: '0.4s' }}>
+        <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 ${isLoaded ? 'schedule-fade-in' : 'opacity-0'}`} style={{ animationDelay: '0.9s' }}>
           <Tabs defaultValue="All">
-            <TabsList className="mb-8">
+            <TabsList className="mb-8 schedule-zoom-in" style={{animationDelay: '1.1s'}}>
               {categories.map((category) => (
-                <TabsTrigger key={category} value={category} className="hover-scale">{category}</TabsTrigger>
+                <TabsTrigger key={category} value={category} className="hover-grow">{category}</TabsTrigger>
               ))}
             </TabsList>
             
@@ -264,8 +269,8 @@ const Schedules = () => {
                     .map((schedule, index) => (
                       <div 
                         key={schedule.id} 
-                        className={`${isLoaded ? 'scale-in hover-scale' : 'opacity-0'}`} 
-                        style={{ animationDelay: `${0.5 + (index * 0.1)}s` }}
+                        className={`${isLoaded ? 'schedule-zoom-in hover-grow' : 'opacity-0'}`} 
+                        style={{ animationDelay: `${1.3 + (index * 0.1)}s` }}
                       >
                         <ScheduleCard
                           title={schedule.title}

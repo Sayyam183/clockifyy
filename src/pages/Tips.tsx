@@ -1,3 +1,4 @@
+
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import TipCard from "@/components/TipCard";
@@ -16,9 +17,14 @@ const Tips = () => {
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    setTimeout(() => {
-      setIsLoaded(true);
-    }, 300);
+    // Preload content before showing animations
+    document.body.style.opacity = '1';
+    
+    // Set isLoaded to true immediately on mount
+    setIsLoaded(true);
+    
+    // Scroll to top on page load
+    window.scrollTo(0, 0);
   }, []);
 
   const tips: Tip[] = [
@@ -89,64 +95,63 @@ const Tips = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Add the CSS animations */}
+      {/* Add the CSS animations with unique effects for Tips page */}
       <style dangerouslySetInnerHTML={{ __html: `
-        .fade-in {
+        .tips-fade-in {
           opacity: 0;
-          animation: fadeIn 0.5s ease-out forwards;
+          animation: tipsFadeIn 0.6s ease-out forwards;
         }
-        .slide-in-left {
+        .tips-slide-up {
           opacity: 0;
-          transform: translateX(-50px);
-          animation: slideInLeft 0.5s ease-out forwards;
+          transform: translateY(30px);
+          animation: tipsSlideUp 0.7s ease-out forwards;
         }
-        .bounce {
-          animation: bounce 1s ease-in-out;
+        .tips-pop {
+          animation: tipsPop 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
-        .scale-in {
+        .tips-card-appear {
           opacity: 0;
-          transform: scale(0.95);
-          animation: scaleIn 0.5s ease-out forwards;
+          transform: translateY(20px) scale(0.97);
+          animation: tipsCardAppear 0.5s ease-out forwards;
         }
-        @keyframes fadeIn {
+        @keyframes tipsFadeIn {
           to { opacity: 1; }
         }
-        @keyframes slideInLeft {
-          to { opacity: 1; transform: translateX(0); }
+        @keyframes tipsSlideUp {
+          to { opacity: 1; transform: translateY(0); }
         }
-        @keyframes bounce {
-          0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-          40% { transform: translateY(-20px); }
-          60% { transform: translateY(-10px); }
+        @keyframes tipsPop {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.05); }
         }
-        @keyframes scaleIn {
-          to { opacity: 1; transform: scale(1); }
+        @keyframes tipsCardAppear {
+          to { opacity: 1; transform: translateY(0) scale(1); }
         }
       `}} />
       
       <Navbar />
       
-      {/* Hero Section */}
+      {/* Hero Section with unique animations */}
       <section className="bg-gradient-to-r from-clockify-blue to-clockify-lightBlue py-12">
-        <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-white ${isLoaded ? 'fade-in' : 'opacity-0'}`}>
-          <h1 className="text-3xl md:text-4xl font-bold mb-4 bounce">
+        <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-white ${isLoaded ? 'tips-fade-in' : 'opacity-0'}`} style={{animationDelay: '0.1s'}}>
+          <h1 className="text-3xl md:text-4xl font-bold mb-4 tips-pop">
             Time Management Tips for Teens
           </h1>
-          <p className="text-xl max-w-3xl mx-auto slide-in-left">
+          <p className="text-xl max-w-3xl mx-auto tips-slide-up" style={{animationDelay: '0.3s'}}>
             Simple strategies to help you take control of your time and achieve your goals.
           </p>
         </div>
       </section>
       
-      {/* Tips Section */}
+      {/* Tips Section with staggered animations */}
       <section className="py-12 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {tips.map((tip, index) => (
               <div 
                 key={tip.id} 
-                className={`${isLoaded ? 'scale-in' : 'opacity-0'}`}
-                style={{ animationDelay: `${index * 0.1}s` }}
+                className={`${isLoaded ? 'tips-card-appear' : 'opacity-0'}`}
+                style={{ animationDelay: `${0.2 + (index * 0.1)}s` }}
               >
                 <TipCard 
                   title={tip.title} 
