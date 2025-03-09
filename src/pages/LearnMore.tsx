@@ -4,17 +4,52 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { BookOpen, Clock, Brain, Heart, Calendar, Zap } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 const LearnMore = () => {
   const [isLoaded, setIsLoaded] = useState(false);
+  const sectionRefs = useRef<HTMLDivElement[]>([]);
 
   useEffect(() => {
     // Set isLoaded to true after a short delay to trigger animations
     setTimeout(() => {
       setIsLoaded(true);
     }, 300);
+
+    // Add intersection observer for scroll animations
+    const observers = sectionRefs.current.map((ref, index) => {
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              setTimeout(() => {
+                entry.target.classList.add('visible');
+              }, 100 * index);
+              observer.unobserve(entry.target);
+            }
+          });
+        },
+        { threshold: 0.2 }
+      );
+
+      if (ref) {
+        observer.observe(ref);
+      }
+      
+      return observer;
+    });
+
+    return () => {
+      observers.forEach((observer) => observer.disconnect());
+    };
   }, []);
+
+  // Function to add refs to our ref array
+  const addToRefs = (el: HTMLDivElement) => {
+    if (el && !sectionRefs.current.includes(el)) {
+      sectionRefs.current.push(el);
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -23,8 +58,8 @@ const LearnMore = () => {
       {/* Hero Section */}
       <section className="bg-gradient-to-r from-clockify-blue to-clockify-lightBlue py-16 md:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className={`text-center text-white ${isLoaded ? 'fade-in' : 'opacity-0'}`}>
-            <h1 className="text-4xl md:text-5xl font-bold mb-6">
+          <div className={`text-center text-white transition-all duration-700 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+            <h1 className="text-4xl md:text-5xl font-bold mb-6 animate-[bounce_1s_ease-in-out]">
               The Science Behind Time Management
             </h1>
             <p className="text-xl mb-8 max-w-3xl mx-auto">
@@ -38,9 +73,12 @@ const LearnMore = () => {
       <section className="py-16 bg-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="space-y-12">
-            <div className={`space-y-4 ${isLoaded ? 'slide-in-left' : 'opacity-0'}`} style={{ animationDelay: '0.2s' }}>
+            <div 
+              ref={addToRefs} 
+              className={`space-y-4 transition-all duration-700 transform translate-x-[-50px] opacity-0 ${isLoaded ? 'visible' : ''}`}
+            >
               <div className="flex items-center gap-3">
-                <div className="bg-clockify-blue rounded-full p-2">
+                <div className="bg-clockify-blue rounded-full p-2 animate-pulse">
                   <Brain className="h-6 w-6 text-white" />
                 </div>
                 <h2 className="text-2xl font-bold text-gray-900">Why Time Management Matters</h2>
@@ -50,9 +88,12 @@ const LearnMore = () => {
               </p>
             </div>
             
-            <div className={`space-y-4 ${isLoaded ? 'slide-in-left' : 'opacity-0'}`} style={{ animationDelay: '0.4s' }}>
+            <div 
+              ref={addToRefs} 
+              className={`space-y-4 transition-all duration-700 transform translate-x-[-50px] opacity-0 ${isLoaded ? 'visible' : ''}`}
+            >
               <div className="flex items-center gap-3">
-                <div className="bg-clockify-blue rounded-full p-2">
+                <div className="bg-clockify-blue rounded-full p-2 animate-pulse">
                   <BookOpen className="h-6 w-6 text-white" />
                 </div>
                 <h2 className="text-2xl font-bold text-gray-900">The Teenage Brain and Time Management</h2>
@@ -62,9 +103,12 @@ const LearnMore = () => {
               </p>
             </div>
             
-            <div className={`space-y-4 ${isLoaded ? 'slide-in-left' : 'opacity-0'}`} style={{ animationDelay: '0.6s' }}>
+            <div 
+              ref={addToRefs} 
+              className={`space-y-4 transition-all duration-700 transform translate-x-[-50px] opacity-0 ${isLoaded ? 'visible' : ''}`}
+            >
               <div className="flex items-center gap-3">
-                <div className="bg-clockify-blue rounded-full p-2">
+                <div className="bg-clockify-blue rounded-full p-2 animate-pulse">
                   <Heart className="h-6 w-6 text-white" />
                 </div>
                 <h2 className="text-2xl font-bold text-gray-900">Health and Well-being Benefits</h2>
@@ -74,9 +118,12 @@ const LearnMore = () => {
               </p>
             </div>
             
-            <div className={`space-y-4 ${isLoaded ? 'slide-in-left' : 'opacity-0'}`} style={{ animationDelay: '0.8s' }}>
+            <div 
+              ref={addToRefs} 
+              className={`space-y-4 transition-all duration-700 transform translate-x-[-50px] opacity-0 ${isLoaded ? 'visible' : ''}`}
+            >
               <div className="flex items-center gap-3">
-                <div className="bg-clockify-blue rounded-full p-2">
+                <div className="bg-clockify-blue rounded-full p-2 animate-pulse">
                   <Calendar className="h-6 w-6 text-white" />
                 </div>
                 <h2 className="text-2xl font-bold text-gray-900">Balancing Academic and Social Life</h2>
@@ -86,9 +133,12 @@ const LearnMore = () => {
               </p>
             </div>
             
-            <div className={`space-y-4 ${isLoaded ? 'slide-in-left' : 'opacity-0'}`} style={{ animationDelay: '1s' }}>
+            <div 
+              ref={addToRefs} 
+              className={`space-y-4 transition-all duration-700 transform translate-x-[-50px] opacity-0 ${isLoaded ? 'visible' : ''}`}
+            >
               <div className="flex items-center gap-3">
-                <div className="bg-clockify-blue rounded-full p-2">
+                <div className="bg-clockify-blue rounded-full p-2 animate-pulse">
                   <Zap className="h-6 w-6 text-white" />
                 </div>
                 <h2 className="text-2xl font-bold text-gray-900">Building Lifelong Skills</h2>
@@ -98,13 +148,19 @@ const LearnMore = () => {
               </p>
             </div>
             
-            <div className={`bg-clockify-lightGray p-8 rounded-xl shadow-sm ${isLoaded ? 'scale-in' : 'opacity-0'}`} style={{ animationDelay: '1.2s' }}>
+            <div 
+              ref={addToRefs} 
+              className={`bg-clockify-lightGray p-8 rounded-xl shadow-sm transition-all duration-700 transform scale-95 opacity-0 ${isLoaded ? 'visible scale-100 opacity-100' : ''}`}
+            >
               <h3 className="text-xl font-bold text-gray-900 mb-4">Ready to transform your time management?</h3>
               <p className="text-gray-700 mb-6">
                 Start with our professionally designed schedules tailored specifically for teenagers' unique needs and challenges.
               </p>
-              <Link to="/schedules">
-                <Button size="lg" className="bg-clockify-blue hover:bg-clockify-darkBlue transition-all duration-300 bounce">
+              <Link to="/schedules" onClick={() => window.scrollTo(0, 0)}>
+                <Button 
+                  size="lg" 
+                  className="bg-clockify-blue hover:bg-clockify-darkBlue transition-all duration-300 transform hover:scale-105"
+                >
                   Browse Schedules
                 </Button>
               </Link>
@@ -117,5 +173,13 @@ const LearnMore = () => {
     </div>
   );
 };
+
+// CSS in JSX
+const styles = `
+  .visible {
+    opacity: 1;
+    transform: translateX(0);
+  }
+`;
 
 export default LearnMore;
