@@ -85,7 +85,7 @@ const Navbar = () => {
             >
               <Clock className="h-8 w-8 text-clockify-blue" />
               <span className="ml-2 text-xl font-bold text-clockify-darkBlue">
-                clockifyy
+                Clockify
               </span>
             </Link>
           </div>
