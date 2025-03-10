@@ -1,8 +1,30 @@
 
+import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Clock } from "lucide-react";
+import { Clock, HelpCircle, MessageCircle, Mail } from "lucide-react";
+import SupportChat from "./SupportChat";
+import { useToast } from "@/hooks/use-toast";
 
 const Footer = () => {
+  const [showChat, setShowChat] = useState(false);
+  const { toast } = useToast();
+
+  const handleChatOpen = () => {
+    setShowChat(true);
+    toast({
+      title: "Live Chat Activated",
+      description: "A support agent will be with you shortly.",
+    });
+  };
+  
+  const handleChatClose = () => {
+    setShowChat(false);
+    toast({
+      title: "Live Chat Ended",
+      description: "Thank you for using our support service.",
+    });
+  };
+
   return (
     <footer className="bg-clockify-darkBlue text-white py-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -42,7 +64,25 @@ const Footer = () => {
             <h3 className="text-sm font-semibold uppercase tracking-wider">Resources</h3>
             <ul className="mt-4 space-y-2">
               <li>
-                <a href="#" className="text-gray-300 hover:text-white">Support</a>
+                <div className="flex flex-col gap-2">
+                  <h4 className="text-gray-300">Support:</h4>
+                  <div className="flex gap-3">
+                    <button 
+                      onClick={handleChatOpen}
+                      className="flex items-center text-gray-300 hover:text-white transition-colors"
+                    >
+                      <MessageCircle className="h-4 w-4 mr-1" />
+                      <span>Live Chat</span>
+                    </button>
+                    <a 
+                      href="mailto:support@clockify.com"
+                      className="flex items-center text-gray-300 hover:text-white transition-colors"
+                    >
+                      <Mail className="h-4 w-4 mr-1" />
+                      <span>Email</span>
+                    </a>
+                  </div>
+                </div>
               </li>
               <li>
                 <a href="#" className="text-gray-300 hover:text-white">Privacy Policy</a>
@@ -76,6 +116,9 @@ const Footer = () => {
           </p>
         </div>
       </div>
+      
+      {/* Render the support chat component */}
+      <SupportChat isOpen={showChat} onClose={handleChatClose} />
     </footer>
   );
 };

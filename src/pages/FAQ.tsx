@@ -2,11 +2,12 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { MessageCircle, Send } from "lucide-react";
+import { MessageCircle, Send, X, ThumbsUp, HelpCircle } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import { Badge } from "@/components/ui/badge";
 
 interface ChatMessage {
   text: string;
@@ -20,6 +21,7 @@ const FAQ = () => {
     { text: "Hi there! How can I help you today?", isUser: false, timestamp: new Date() }
   ]);
   const [inputValue, setInputValue] = useState("");
+  const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const { toast } = useToast();
@@ -57,6 +59,13 @@ const FAQ = () => {
     });
   };
 
+  const handleFeedback = () => {
+    toast({
+      title: "Thank you!",
+      description: "We appreciate your feedback.",
+    });
+  };
+
   // AI response generation
   const getAIResponse = (userMessage: string) => {
     const responses = [
@@ -88,15 +97,19 @@ const FAQ = () => {
     setMessages(prev => [...prev, userMessage]);
     setInputValue("");
     
+    // Show typing indicator
+    setIsTyping(true);
+    
     // Simulate AI typing with slight delay
     setTimeout(() => {
+      setIsTyping(false);
       const aiResponse = {
         text: getAIResponse(inputValue),
         isUser: false,
         timestamp: new Date()
       };
       setMessages(prev => [...prev, aiResponse]);
-    }, 1000);
+    }, 1500);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -201,6 +214,42 @@ const FAQ = () => {
           box-shadow: -4px 0 0 0 #8B5CF6;
           padding-left: 8px;
         }
+
+        .typing-indicator {
+          display: flex;
+          align-items: center;
+          column-gap: 0.25rem;
+        }
+        
+        .typing-indicator-dot {
+          display: block;
+          width: 0.5rem;
+          height: 0.5rem;
+          border-radius: 50%;
+          background-color: #8B5CF6;
+          animation: typingAnimation 1.4s infinite ease-in-out;
+        }
+        
+        .typing-indicator-dot:nth-child(1) {
+          animation-delay: 0s;
+        }
+        
+        .typing-indicator-dot:nth-child(2) {
+          animation-delay: 0.2s;
+        }
+        
+        .typing-indicator-dot:nth-child(3) {
+          animation-delay: 0.4s;
+        }
+        
+        @keyframes typingAnimation {
+          0%, 60%, 100% {
+            transform: translateY(0);
+          }
+          30% {
+            transform: translateY(-0.25rem);
+          }
+        }
       `}} />
       
       <Navbar />
@@ -267,16 +316,19 @@ const FAQ = () => {
         </div>
       </section>
       
-      {/* Live Chat Modal */}
+      {/* Live Chat Modal with improved UI */}
       {showChat && (
         <div className="fixed bottom-4 right-4 w-80 z-50 scale-in">
-          <Card className="p-4 shadow-lg">
+          <Card className="p-4 shadow-lg border-t-4 border-t-clockify-blue">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold flex items-center">
+              <div className="flex items-center">
                 <MessageCircle className="mr-2 h-5 w-5 text-clockify-blue" />
-                Live Support
-              </h3>
-              <Button variant="ghost" size="sm" onClick={handleChatClose}>×</Button>
+                <h3 className="text-lg font-semibold">Live Support</h3>
+                <Badge className="ml-2 bg-green-500 text-white text-xs">Online</Badge>
+              </div>
+              <Button variant="ghost" size="sm" onClick={handleChatClose} className="h-6 w-6 p-0 rounded-full">
+                <X className="h-4 w-4" />
+              </Button>
             </div>
             <div className="h-60 bg-gray-50 rounded p-3 mb-4 overflow-auto">
               {messages.map((message, index) => (
@@ -289,23 +341,52 @@ const FAQ = () => {
                     }`}
                   >
                     {message.text}
+                    <div className="text-xs opacity-70 mt-1">
+                      {message.timestamp.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                    </div>
                   </div>
                 </div>
               ))}
+              {isTyping && (
+                <div className="flex mb-2 justify-start">
+                  <div className="rounded-lg p-2 bg-gray-200 text-gray-800">
+                    <div className="typing-indicator">
+                      <span className="typing-indicator-dot"></span>
+                      <span className="typing-indicator-dot"></span>
+                      <span className="typing-indicator-dot"></span>
+                    </div>
+                  </div>
+                </div>
+              )}
               <div ref={messagesEndRef} />
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 mb-2">
               <input 
                 type="text" 
                 placeholder="Type your message..." 
-                className="flex-grow p-2 border rounded"
+                className="flex-grow p-2 border rounded focus:ring-2 focus:ring-clockify-blue focus:border-transparent outline-none"
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyPress={handleKeyPress}
               />
-              <Button onClick={handleMessageSend} className="hover-scale">
+              <Button onClick={handleMessageSend} className="hover:scale-105 transition-transform bg-clockify-blue hover:bg-clockify-darkBlue">
                 <Send className="h-4 w-4" />
               </Button>
+            </div>
+            <div className="flex justify-between text-xs text-gray-500 px-1">
+              <button 
+                onClick={handleFeedback}
+                className="flex items-center hover:text-clockify-blue transition-colors"
+              >
+                <ThumbsUp className="h-3 w-3 mr-1" />
+                Rate this chat
+              </button>
+              <a 
+                href="mailto:support@clockify.com" 
+                className="flex items-center hover:text-clockify-blue transition-colors"
+              >
+                Email transcript
+              </a>
             </div>
           </Card>
         </div>
