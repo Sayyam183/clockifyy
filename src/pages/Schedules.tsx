@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -184,14 +185,25 @@ const Schedules = () => {
       return;
     }
     
-    setSchedules([
+    // Check if any time or activity is empty
+    const hasEmptyFields = newSchedule.scheduleItems.some(
+      item => !item.time.trim() || !item.activity.trim()
+    );
+    
+    if (hasEmptyFields) {
+      toast.error("Please complete all time and activity fields");
+      return;
+    }
+    
+    setSchedules(prevSchedules => [
       {
         ...newSchedule,
         id: Date.now()
       },
-      ...schedules
+      ...prevSchedules
     ]);
     
+    // Reset the form after successful creation
     setNewSchedule({
       id: Date.now(),
       title: "",
@@ -210,25 +222,27 @@ const Schedules = () => {
   };
   
   const addNewTimeSlot = () => {
-    setNewSchedule({
-      ...newSchedule,
+    setNewSchedule(prev => ({
+      ...prev,
       scheduleItems: [
-        ...newSchedule.scheduleItems,
+        ...prev.scheduleItems,
         { time: "", activity: "" }
       ]
-    });
+    }));
   };
   
   const updateTimeSlot = (index: number, field: 'time' | 'activity', value: string) => {
-    const updatedItems = [...newSchedule.scheduleItems];
-    updatedItems[index] = { 
-      ...updatedItems[index], 
-      [field]: value 
-    };
-    
-    setNewSchedule({
-      ...newSchedule,
-      scheduleItems: updatedItems
+    setNewSchedule(prev => {
+      const updatedItems = [...prev.scheduleItems];
+      updatedItems[index] = { 
+        ...updatedItems[index], 
+        [field]: value 
+      };
+      
+      return {
+        ...prev,
+        scheduleItems: updatedItems
+      };
     });
   };
   
@@ -238,11 +252,10 @@ const Schedules = () => {
       return;
     }
     
-    const updatedItems = newSchedule.scheduleItems.filter((_, i) => i !== index);
-    setNewSchedule({
-      ...newSchedule,
-      scheduleItems: updatedItems
-    });
+    setNewSchedule(prev => ({
+      ...prev,
+      scheduleItems: prev.scheduleItems.filter((_, i) => i !== index)
+    }));
   };
 
   const filteredSchedules = schedules.filter(schedule => 
@@ -413,6 +426,7 @@ const Schedules = () => {
                         size="sm" 
                         onClick={addNewTimeSlot}
                         className="flex items-center gap-1"
+                        type="button"
                       >
                         <Plus className="h-4 w-4" /> Add Activity
                       </Button>
@@ -438,6 +452,7 @@ const Schedules = () => {
                             size="icon" 
                             className="text-red-500 hover:text-red-700 hover:bg-red-50"
                             onClick={() => removeTimeSlot(index)}
+                            type="button"
                           >
                             ✕
                           </Button>
@@ -449,6 +464,7 @@ const Schedules = () => {
                   <Button 
                     className="w-full bg-clockify-blue hover:bg-clockify-darkBlue"
                     onClick={handleCreateSchedule}
+                    type="button"
                   >
                     <Save className="mr-2 h-4 w-4" /> Create Schedule
                   </Button>
