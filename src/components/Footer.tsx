@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Clock, HelpCircle, MessageCircle, Mail } from "lucide-react";
+import { Clock, MessageCircle, Mail } from "lucide-react";
 import SupportChat from "./SupportChat";
 import { useToast } from "@/hooks/use-toast";
 
@@ -71,23 +71,8 @@ const Footer = () => {
                       to="/faq"
                       className="flex items-center text-gray-300 hover:text-white transition-colors"
                     >
-                      <HelpCircle className="h-4 w-4 mr-1" />
                       <span>Support</span>
                     </Link>
-                    <button 
-                      onClick={handleChatOpen}
-                      className="flex items-center text-gray-300 hover:text-white transition-colors"
-                    >
-                      <MessageCircle className="h-4 w-4 mr-1" />
-                      <span>Live Chat</span>
-                    </button>
-                    <a 
-                      href="mailto:support@clockify.com"
-                      className="flex items-center text-gray-300 hover:text-white transition-colors"
-                    >
-                      <Mail className="h-4 w-4 mr-1" />
-                      <span>Email</span>
-                    </a>
                   </div>
                 </div>
               </li>
