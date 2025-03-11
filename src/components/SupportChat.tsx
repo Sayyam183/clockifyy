@@ -19,11 +19,16 @@ interface SupportChatProps {
 
 const SupportChat = ({ isOpen, onClose }: SupportChatProps) => {
   const [messages, setMessages] = useState<ChatMessage[]>([
-    { text: "Hi there! How can I help you today?", isUser: false, timestamp: new Date() }
+    { text: "Hi there! I'm your Clockify assistant. How can I help you today?", isUser: false, timestamp: new Date() }
   ]);
   const [inputValue, setInputValue] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [conversationContext, setConversationContext] = useState({
+    userName: "",
+    topicDiscussed: "",
+    questionCount: 0,
+  });
   const { toast } = useToast();
 
   // Auto-scroll to bottom of chat
@@ -33,22 +38,90 @@ const SupportChat = ({ isOpen, onClose }: SupportChatProps) => {
 
   const handleFeedback = () => {
     toast({
-      title: "Thank you!",
-      description: "We appreciate your feedback.",
+      title: "Thank you for your feedback!",
+      description: "We're constantly improving our AI assistant based on your input.",
     });
   };
 
-  // AI response generation - improved with better contextual responses
-  const getAIResponse = (userMessage: string) => {
+  // Detect user name from messages
+  useEffect(() => {
+    const userMessages = messages.filter(m => m.isUser).map(m => m.text);
+    if (userMessages.length > 0 && conversationContext.userName === "") {
+      // Check for name introduction patterns
+      const namePatterns = [
+        /my name is (\w+)/i,
+        /i'm (\w+)/i,
+        /i am (\w+)/i,
+        /call me (\w+)/i
+      ];
+      
+      for (const message of userMessages) {
+        for (const pattern of namePatterns) {
+          const match = message.match(pattern);
+          if (match && match[1]) {
+            setConversationContext(prev => ({
+              ...prev,
+              userName: match[1]
+            }));
+            break;
+          }
+        }
+      }
+    }
+  }, [messages, conversationContext.userName]);
+
+  // Track topic being discussed
+  const updateConversationContext = (userMessage: string) => {
+    // Increment question count
+    const isQuestion = userMessage.includes("?");
+    
+    let topic = conversationContext.topicDiscussed;
+    
+    // Detect topic from message
+    if (userMessage.toLowerCase().includes("schedule")) {
+      topic = "schedules";
+    } else if (userMessage.toLowerCase().includes("study") || userMessage.toLowerCase().includes("school")) {
+      topic = "study techniques";
+    } else if (userMessage.toLowerCase().includes("app") || userMessage.toLowerCase().includes("clockify")) {
+      topic = "app features";
+    } else if (userMessage.toLowerCase().includes("account") || userMessage.toLowerCase().includes("login")) {
+      topic = "account management";
+    }
+    
+    setConversationContext(prev => ({
+      ...prev,
+      questionCount: isQuestion ? prev.questionCount + 1 : prev.questionCount,
+      topicDiscussed: topic || prev.topicDiscussed
+    }));
+    
+    return { ...conversationContext, topicDiscussed: topic, questionCount: isQuestion ? conversationContext.questionCount + 1 : conversationContext.questionCount };
+  };
+
+  // Improved AI response generation with context awareness
+  const getAIResponse = (userMessage: string, context: any) => {
     // Convert message to lowercase for easier matching
     const lowerMessage = userMessage.toLowerCase();
     
-    // Greeting patterns
+    // Personalization based on detected name
+    const personalization = context.userName ? `, ${context.userName}` : "";
+    
+    // Greeting patterns with personalization
     if (lowerMessage.includes("hi") || 
         lowerMessage.includes("hello") || 
         lowerMessage.includes("hey") ||
         lowerMessage.includes("greetings")) {
-      return "Hello! 👋 How can I help you with your time management today?";
+      return `Hello${personalization}! 👋 How can I help you with your time management today?`;
+    }
+    
+    // If user introduces themselves
+    if (lowerMessage.includes("my name is") || 
+        lowerMessage.includes("i'm ") || 
+        lowerMessage.includes("i am ") ||
+        lowerMessage.includes("call me ")) {
+      if (context.userName) {
+        return `Nice to meet you, ${context.userName}! How can I assist you with Clockify today?`;
+      }
+      return "Nice to meet you! How can I assist you with Clockify today?";
     }
     
     // Questions about the app
@@ -71,16 +144,38 @@ const SupportChat = ({ isOpen, onClose }: SupportChatProps) => {
     
     // Help or support queries
     if (lowerMessage.includes("help") || lowerMessage.includes("support") || lowerMessage.includes("issue")) {
-      return "I'm here to help! Please let me know what specific issue you're having, and I'll guide you through resolving it. You can also visit our FAQ page for common questions.";
+      return `I'm here to help${personalization}! Please let me know what specific issue you're having with Clockify, and I'll guide you through resolving it. You can also check our FAQ page for common questions.`;
+    }
+
+    // Thank you responses
+    if (lowerMessage.includes("thank") || lowerMessage.includes("thanks") || lowerMessage.includes("appreciate")) {
+      return `You're welcome${personalization}! I'm happy to help. Is there anything else you'd like to know about Clockify?`;
+    }
+
+    // Goodbye responses
+    if (lowerMessage.includes("bye") || lowerMessage.includes("goodbye") || lowerMessage.includes("see you")) {
+      return `Goodbye${personalization}! Feel free to come back anytime you have questions about managing your time with Clockify.`;
     }
     
-    // Default responses for anything else
+    // Questions about features
+    if (lowerMessage.includes("feature") || lowerMessage.includes("can it") || lowerMessage.includes("does it")) {
+      return "Clockify includes features like customizable schedules, time tracking, reminders, and educational tips tailored for teens. It's designed to be easy to use while providing powerful time management tools.";
+    }
+    
+    // Context-aware follow-up based on previous topic
+    if (context.topicDiscussed === "schedules" && context.questionCount > 1) {
+      return "Looking for more schedule advice? You might want to check out our Schedules page for templates designed specifically for different activities and study styles.";
+    } else if (context.topicDiscussed === "study techniques" && context.questionCount > 1) {
+      return "For more study tips, I recommend checking out our Tips page. We've compiled advice from successful students on how to maximize your study sessions.";
+    }
+    
+    // Default responses with some variety
     const defaultResponses = [
-      "That's a great question. Let me help you with that!",
-      "I understand what you're asking. Here's what you need to know about managing your time effectively...",
-      "Thanks for reaching out! I'd be happy to assist you with that question about Clockify.",
-      "Many teens have similar questions. Here's what might help you...",
-      "I can definitely help with that. Let's look at how Clockify can address your needs."
+      `That's a great question${personalization}. Clockify can definitely help with that!`,
+      `I understand what you're asking about. Here's what you need to know about managing your time effectively...`,
+      `Thanks for reaching out${personalization}! I'd be happy to assist you with that question about Clockify.`,
+      `Many teens have similar questions. Clockify is designed to address exactly these kinds of time management challenges.`,
+      `I can definitely help with that${personalization}. Let's look at how Clockify can address your needs.`
     ];
     
     return defaultResponses[Math.floor(Math.random() * defaultResponses.length)];
@@ -99,19 +194,23 @@ const SupportChat = ({ isOpen, onClose }: SupportChatProps) => {
     setMessages(prev => [...prev, userMessage]);
     setInputValue("");
     
+    // Update context and get updated context
+    const updatedContext = updateConversationContext(inputValue);
+    
     // Show typing indicator
     setIsTyping(true);
     
-    // Simulate AI typing with slight delay
+    // Simulate AI typing with variable delay based on response length
     setTimeout(() => {
       setIsTyping(false);
+      const aiResponseText = getAIResponse(inputValue, updatedContext);
       const aiResponse = {
-        text: getAIResponse(inputValue),
+        text: aiResponseText,
         isUser: false,
         timestamp: new Date()
       };
       setMessages(prev => [...prev, aiResponse]);
-    }, 1500);
+    }, 1000 + Math.random() * 1000); // Random delay between 1-2 seconds for more natural feel
   };
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -160,12 +259,26 @@ const SupportChat = ({ isOpen, onClose }: SupportChatProps) => {
             transform: translateY(-0.25rem);
           }
         }
+
+        .chat-message {
+          transition: all 0.3s ease;
+          animation: messageAppear 0.3s forwards;
+          opacity: 0;
+          transform: translateY(10px);
+        }
+
+        @keyframes messageAppear {
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
       `}} />
       <Card className="p-4 shadow-lg border-t-4 border-t-clockify-blue">
         <div className="flex justify-between items-center mb-4">
           <div className="flex items-center">
             <MessageCircle className="mr-2 h-5 w-5 text-clockify-blue" />
-            <h3 className="text-lg font-semibold">Live Support</h3>
+            <h3 className="text-lg font-semibold">Clockify Assistant</h3>
             <Badge className="ml-2 bg-green-500 text-white text-xs">Online</Badge>
           </div>
           <Button variant="ghost" size="sm" onClick={onClose} className="h-6 w-6 p-0 rounded-full">
@@ -174,7 +287,11 @@ const SupportChat = ({ isOpen, onClose }: SupportChatProps) => {
         </div>
         <div className="h-60 bg-gray-50 rounded p-3 mb-4 overflow-auto">
           {messages.map((message, index) => (
-            <div key={index} className={`flex mb-2 ${message.isUser ? 'justify-end' : 'justify-start'}`}>
+            <div 
+              key={index} 
+              className={`flex mb-2 ${message.isUser ? 'justify-end' : 'justify-start'} chat-message`}
+              style={{ animationDelay: `${index * 0.1}s` }}
+            >
               <div 
                 className={`rounded-lg p-2 max-w-[80%] ${
                   message.isUser 
@@ -190,7 +307,7 @@ const SupportChat = ({ isOpen, onClose }: SupportChatProps) => {
             </div>
           ))}
           {isTyping && (
-            <div className="flex mb-2 justify-start">
+            <div className="flex mb-2 justify-start chat-message">
               <div className="rounded-lg p-2 bg-gray-200 text-gray-800">
                 <div className="typing-indicator">
                   <span className="typing-indicator-dot"></span>
@@ -211,7 +328,11 @@ const SupportChat = ({ isOpen, onClose }: SupportChatProps) => {
             onChange={(e) => setInputValue(e.target.value)}
             onKeyPress={handleKeyPress}
           />
-          <Button onClick={handleMessageSend} className="hover:scale-105 transition-transform bg-clockify-blue hover:bg-clockify-darkBlue">
+          <Button 
+            onClick={handleMessageSend} 
+            className="hover:scale-105 transition-transform bg-clockify-blue hover:bg-clockify-darkBlue"
+            disabled={!inputValue.trim()}
+          >
             <Send className="h-4 w-4" />
           </Button>
         </div>
