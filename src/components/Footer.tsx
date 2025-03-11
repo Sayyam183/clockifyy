@@ -67,6 +67,13 @@ const Footer = () => {
                 <div className="flex flex-col gap-2">
                   <h4 className="text-gray-300">Support:</h4>
                   <div className="flex gap-3">
+                    <Link 
+                      to="/faq"
+                      className="flex items-center text-gray-300 hover:text-white transition-colors"
+                    >
+                      <HelpCircle className="h-4 w-4 mr-1" />
+                      <span>Support</span>
+                    </Link>
                     <button 
                       onClick={handleChatOpen}
                       className="flex items-center text-gray-300 hover:text-white transition-colors"

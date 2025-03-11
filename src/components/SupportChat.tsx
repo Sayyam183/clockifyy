@@ -38,22 +38,52 @@ const SupportChat = ({ isOpen, onClose }: SupportChatProps) => {
     });
   };
 
-  // AI response generation
+  // AI response generation - improved with better contextual responses
   const getAIResponse = (userMessage: string) => {
-    const responses = [
-      "I understand your question. Let me help you with that!",
-      "That's a good question about time management.",
-      "I can definitely assist you with that issue.",
-      "Let me find the information you need about Clockify.",
-      "Thanks for reaching out! Here's what you need to know...",
-      "I'm checking our resources to give you the best answer.",
-      "Great question! Many teens ask about this topic.",
-      "I'd be happy to explain how Clockify can help with that.",
-      "Let me show you how to better manage your time for that activity.",
-      "Our schedules are designed to help with exactly that kind of situation."
+    // Convert message to lowercase for easier matching
+    const lowerMessage = userMessage.toLowerCase();
+    
+    // Greeting patterns
+    if (lowerMessage.includes("hi") || 
+        lowerMessage.includes("hello") || 
+        lowerMessage.includes("hey") ||
+        lowerMessage.includes("greetings")) {
+      return "Hello! 👋 How can I help you with your time management today?";
+    }
+    
+    // Questions about the app
+    if (lowerMessage.includes("what is") || lowerMessage.includes("how does") || lowerMessage.includes("explain")) {
+      if (lowerMessage.includes("clockify")) {
+        return "Clockify is a time management app designed specifically for teenagers aged 13-18. It helps you balance school, extracurricular activities, and rest with customizable schedules and useful tips.";
+      }
+      return "Great question! Clockify offers personalized schedules, time management tips, and tracking tools to help teens better manage their time. What specific aspect would you like to know more about?";
+    }
+    
+    // Schedule related queries
+    if (lowerMessage.includes("schedule") || lowerMessage.includes("plan") || lowerMessage.includes("calendar")) {
+      return "Our schedules are fully customizable to fit your unique needs. You can create different templates for school days, weekends, or special activity days. Would you like me to help you set up your first schedule?";
+    }
+    
+    // School/study related
+    if (lowerMessage.includes("study") || lowerMessage.includes("school") || lowerMessage.includes("homework")) {
+      return "Effective studying is all about balance! We recommend the Pomodoro technique: 25 minutes of focused study followed by a 5-minute break. Our schedules can help you implement this and other study strategies.";
+    }
+    
+    // Help or support queries
+    if (lowerMessage.includes("help") || lowerMessage.includes("support") || lowerMessage.includes("issue")) {
+      return "I'm here to help! Please let me know what specific issue you're having, and I'll guide you through resolving it. You can also visit our FAQ page for common questions.";
+    }
+    
+    // Default responses for anything else
+    const defaultResponses = [
+      "That's a great question. Let me help you with that!",
+      "I understand what you're asking. Here's what you need to know about managing your time effectively...",
+      "Thanks for reaching out! I'd be happy to assist you with that question about Clockify.",
+      "Many teens have similar questions. Here's what might help you...",
+      "I can definitely help with that. Let's look at how Clockify can address your needs."
     ];
     
-    return responses[Math.floor(Math.random() * responses.length)];
+    return defaultResponses[Math.floor(Math.random() * defaultResponses.length)];
   };
 
   const handleMessageSend = () => {
