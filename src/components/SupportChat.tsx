@@ -1,6 +1,6 @@
 
 import { useState, useRef, useEffect } from "react";
-import { MessageCircle, Send, X, ThumbsUp } from "lucide-react";
+import { MessageCircle, Send, X, ThumbsUp, Star, Smile, Meh, Frown, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -29,18 +29,25 @@ const SupportChat = ({ isOpen, onClose }: SupportChatProps) => {
     topicDiscussed: "",
     questionCount: 0,
   });
+  const [showRatingPanel, setShowRatingPanel] = useState(false);
   const { toast } = useToast();
 
   // Auto-scroll to bottom of chat
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, [messages, showRatingPanel]);
 
   const handleFeedback = () => {
+    setShowRatingPanel(true);
+  };
+
+  const submitRating = (rating: string, feedback: string = "") => {
+    // Here you could implement API calls to save the rating
     toast({
       title: "Thank you for your feedback!",
-      description: "We're constantly improving our AI assistant based on your input.",
+      description: `You rated this conversation as "${rating}". We'll use this to improve.`,
     });
+    setShowRatingPanel(false);
   };
 
   // Detect user name from messages
@@ -273,6 +280,19 @@ const SupportChat = ({ isOpen, onClose }: SupportChatProps) => {
             transform: translateY(0);
           }
         }
+
+        .rating-option {
+          transition: all 0.2s ease;
+        }
+        
+        .rating-option:hover {
+          transform: scale(1.15);
+        }
+        
+        .rating-option.selected {
+          transform: scale(1.2);
+          color: #8B5CF6;
+        }
       `}} />
       <Card className="p-4 shadow-lg border-t-4 border-t-clockify-blue">
         <div className="flex justify-between items-center mb-4">
@@ -285,6 +305,8 @@ const SupportChat = ({ isOpen, onClose }: SupportChatProps) => {
             <X className="h-4 w-4" />
           </Button>
         </div>
+        
+        {/* Chat messages container */}
         <div className="h-60 bg-gray-50 rounded p-3 mb-4 overflow-auto">
           {messages.map((message, index) => (
             <div 
@@ -317,8 +339,34 @@ const SupportChat = ({ isOpen, onClose }: SupportChatProps) => {
               </div>
             </div>
           )}
+
+          {/* Rating Panel */}
+          {showRatingPanel && (
+            <div className="bg-white rounded-lg p-4 shadow-md border border-gray-200 mb-3 chat-message">
+              <h4 className="font-medium text-sm mb-2 text-center">How was your experience?</h4>
+              <div className="flex justify-center gap-3 mb-3">
+                <RatingOption icon={<Frown className="h-6 w-6" />} onClick={() => submitRating("Poor")} label="Poor" />
+                <RatingOption icon={<Meh className="h-6 w-6" />} onClick={() => submitRating("Okay")} label="Okay" />
+                <RatingOption icon={<Smile className="h-6 w-6" />} onClick={() => submitRating("Good")} label="Good" />
+                <RatingOption icon={<Heart className="h-6 w-6" />} onClick={() => submitRating("Love it")} label="Love it" />
+              </div>
+              <div className="flex justify-center">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="text-xs text-gray-500"
+                  onClick={() => setShowRatingPanel(false)}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          )}
+          
           <div ref={messagesEndRef} />
         </div>
+        
+        {/* Message input */}
         <div className="flex gap-2 mb-2">
           <input 
             type="text" 
@@ -336,6 +384,8 @@ const SupportChat = ({ isOpen, onClose }: SupportChatProps) => {
             <Send className="h-4 w-4" />
           </Button>
         </div>
+        
+        {/* Chat footer */}
         <div className="flex justify-between text-xs text-gray-500 px-1">
           <button 
             onClick={handleFeedback}
@@ -352,6 +402,27 @@ const SupportChat = ({ isOpen, onClose }: SupportChatProps) => {
           </a>
         </div>
       </Card>
+    </div>
+  );
+};
+
+// Rating option component
+interface RatingOptionProps {
+  icon: React.ReactNode;
+  onClick: () => void;
+  label: string;
+}
+
+const RatingOption = ({ icon, onClick, label }: RatingOptionProps) => {
+  return (
+    <div 
+      className="rating-option flex flex-col items-center cursor-pointer" 
+      onClick={onClick}
+    >
+      <div className="text-gray-600 hover:text-clockify-blue mb-1">
+        {icon}
+      </div>
+      <span className="text-xs text-gray-500">{label}</span>
     </div>
   );
 };
