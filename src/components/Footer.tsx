@@ -64,17 +64,7 @@ const Footer = () => {
             <h3 className="text-sm font-semibold uppercase tracking-wider">Resources</h3>
             <ul className="mt-4 space-y-2">
               <li>
-                <div className="flex flex-col gap-2">
-                  <h4 className="text-gray-300">Support:</h4>
-                  <div className="flex gap-3">
-                    <Link 
-                      to="/faq"
-                      className="flex items-center text-gray-300 hover:text-white transition-colors"
-                    >
-                      <span>Support</span>
-                    </Link>
-                  </div>
-                </div>
+                <Link to="/faq" className="text-gray-300 hover:text-white">Support</Link>
               </li>
               <li>
                 <a href="#" className="text-gray-300 hover:text-white">Privacy Policy</a>
