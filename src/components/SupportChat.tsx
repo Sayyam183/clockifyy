@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
+import { Input } from "@/components/ui/input";
 
 interface ChatMessage {
   text: string;
@@ -30,15 +31,18 @@ const SupportChat = ({ isOpen, onClose }: SupportChatProps) => {
     questionCount: 0,
   });
   const [showRatingPanel, setShowRatingPanel] = useState(false);
+  const [showTranscriptForm, setShowTranscriptForm] = useState(false);
+  const [transcriptEmail, setTranscriptEmail] = useState("");
   const { toast } = useToast();
 
   // Auto-scroll to bottom of chat
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, showRatingPanel]);
+  }, [messages, showRatingPanel, showTranscriptForm]);
 
   const handleFeedback = () => {
     setShowRatingPanel(true);
+    setShowTranscriptForm(false);
   };
 
   const submitRating = (rating: string, feedback: string = "") => {
@@ -48,6 +52,21 @@ const SupportChat = ({ isOpen, onClose }: SupportChatProps) => {
       description: `You rated this conversation as "${rating}". We'll use this to improve.`,
     });
     setShowRatingPanel(false);
+  };
+  
+  const handleTranscriptRequest = () => {
+    setShowTranscriptForm(true);
+    setShowRatingPanel(false);
+  };
+
+  const sendTranscript = (e: React.FormEvent) => {
+    e.preventDefault();
+    toast({
+      title: "Transcript Sent",
+      description: `The chat transcript has been sent to ${transcriptEmail}`,
+    });
+    setShowTranscriptForm(false);
+    setTranscriptEmail("");
   };
 
   // Detect user name from messages
@@ -363,6 +382,40 @@ const SupportChat = ({ isOpen, onClose }: SupportChatProps) => {
             </div>
           )}
           
+          {/* Email Transcript Form */}
+          {showTranscriptForm && (
+            <div className="bg-white rounded-lg p-4 shadow-md border border-gray-200 mb-3 chat-message">
+              <h4 className="font-medium text-sm mb-2 text-center">Send Chat Transcript</h4>
+              <form onSubmit={sendTranscript} className="space-y-2">
+                <Input
+                  type="email"
+                  placeholder="Your email address"
+                  value={transcriptEmail}
+                  onChange={(e) => setTranscriptEmail(e.target.value)}
+                  required
+                  className="text-sm"
+                />
+                <div className="flex justify-between gap-2">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="text-xs text-gray-500"
+                    onClick={() => setShowTranscriptForm(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button 
+                    type="submit" 
+                    size="sm" 
+                    className="text-xs bg-clockify-blue hover:bg-clockify-darkBlue"
+                  >
+                    Send
+                  </Button>
+                </div>
+              </form>
+            </div>
+          )}
+          
           <div ref={messagesEndRef} />
         </div>
         
@@ -394,12 +447,12 @@ const SupportChat = ({ isOpen, onClose }: SupportChatProps) => {
             <ThumbsUp className="h-3 w-3 mr-1" />
             Rate this chat
           </button>
-          <a 
-            href="mailto:support@clockify.com" 
+          <button 
+            onClick={handleTranscriptRequest}
             className="flex items-center hover:text-clockify-blue transition-colors"
           >
             Email transcript
-          </a>
+          </button>
         </div>
       </Card>
     </div>

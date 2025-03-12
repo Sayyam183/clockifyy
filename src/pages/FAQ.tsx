@@ -2,12 +2,13 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { MessageCircle, Send, X, ThumbsUp, HelpCircle } from "lucide-react";
+import { MessageCircle, Send, X, ThumbsUp, HelpCircle, Mail, Smile, Meh, Frown, Heart } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 
 interface ChatMessage {
   text: string;
@@ -17,6 +18,13 @@ interface ChatMessage {
 
 const FAQ = () => {
   const [showChat, setShowChat] = useState(false);
+  const [showEmailForm, setShowEmailForm] = useState(false);
+  const [showRatingPanel, setShowRatingPanel] = useState(false);
+  const [emailInput, setEmailInput] = useState("");
+  const [emailSubject, setEmailSubject] = useState("");
+  const [emailBody, setEmailBody] = useState("");
+  const [showTranscriptForm, setShowTranscriptForm] = useState(false);
+  const [transcriptEmail, setTranscriptEmail] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([
     { text: "Hi there! How can I help you today?", isUser: false, timestamp: new Date() }
   ]);
@@ -41,18 +49,39 @@ const FAQ = () => {
   // Auto-scroll to bottom of chat
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, [messages, showRatingPanel, showTranscriptForm]);
   
   const handleChatOpen = () => {
     setShowChat(true);
+    setShowEmailForm(false);
     toast({
       title: "Live Chat Activated",
       description: "A support agent will be with you shortly.",
     });
   };
   
+  const handleEmailSupport = () => {
+    setShowEmailForm(true);
+    setShowChat(false);
+  };
+  
+  const handleSubmitEmail = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Here you would implement the actual email sending logic
+    toast({
+      title: "Email Sent",
+      description: "Thank you for your message. We'll respond shortly.",
+    });
+    setShowEmailForm(false);
+    setEmailInput("");
+    setEmailSubject("");
+    setEmailBody("");
+  };
+  
   const handleChatClose = () => {
     setShowChat(false);
+    setShowRatingPanel(false);
+    setShowTranscriptForm(false);
     toast({
       title: "Live Chat Ended",
       description: "Thank you for using our support service.",
@@ -60,28 +89,74 @@ const FAQ = () => {
   };
 
   const handleFeedback = () => {
+    setShowRatingPanel(true);
+    setShowTranscriptForm(false);
+  };
+
+  const submitRating = (rating: string) => {
     toast({
       title: "Thank you!",
-      description: "We appreciate your feedback.",
+      description: `You rated this conversation as "${rating}". We appreciate your feedback.`,
     });
+    setShowRatingPanel(false);
+  };
+
+  const handleTranscriptRequest = () => {
+    setShowTranscriptForm(true);
+    setShowRatingPanel(false);
+  };
+
+  const sendTranscript = (e: React.FormEvent) => {
+    e.preventDefault();
+    toast({
+      title: "Transcript Sent",
+      description: `The chat transcript has been sent to ${transcriptEmail}`,
+    });
+    setShowTranscriptForm(false);
+    setTranscriptEmail("");
   };
 
   // AI response generation
   const getAIResponse = (userMessage: string) => {
-    const responses = [
-      "I understand your question. Let me help you with that!",
-      "That's a good question about time management.",
-      "I can definitely assist you with that issue.",
-      "Let me find the information you need about Clockify.",
-      "Thanks for reaching out! Here's what you need to know...",
-      "I'm checking our resources to give you the best answer.",
-      "Great question! Many teens ask about this topic.",
-      "I'd be happy to explain how Clockify can help with that.",
-      "Let me show you how to better manage your time for that activity.",
-      "Our schedules are designed to help with exactly that kind of situation."
+    // Convert message to lowercase for easier matching
+    const lowerMessage = userMessage.toLowerCase();
+    
+    // Greeting patterns
+    if (lowerMessage.includes("hi") || 
+        lowerMessage.includes("hello") || 
+        lowerMessage.includes("hey") ||
+        lowerMessage.includes("greetings")) {
+      return `Hello! 👋 How can I help you with Clockify today?`;
+    }
+    
+    // Thank you responses
+    if (lowerMessage.includes("thank") || lowerMessage.includes("thanks")) {
+      return "You're welcome! I'm happy to help. Is there anything else you'd like to know about Clockify?";
+    }
+    
+    // Questions about the app
+    if (lowerMessage.includes("what is") || lowerMessage.includes("how does") || 
+        lowerMessage.includes("explain") || lowerMessage.includes("?")) {
+      if (lowerMessage.includes("clockify")) {
+        return "Clockify is a time management app designed specifically for teenagers aged 13-18. It helps you balance school, extracurricular activities, and rest with customizable schedules and useful tips.";
+      }
+      return "Great question! Clockify offers personalized schedules, time management tips, and tracking tools to help teens better manage their time. What specific aspect would you like to know more about?";
+    }
+    
+    // Schedule related queries
+    if (lowerMessage.includes("schedule") || lowerMessage.includes("plan") || lowerMessage.includes("calendar")) {
+      return "Our schedules are fully customizable to fit your unique needs. You can create different templates for school days, weekends, or special activity days. Would you like me to help you set up your first schedule?";
+    }
+    
+    // Default responses with some variety
+    const defaultResponses = [
+      "I understand what you're asking about. Here's what you need to know about managing your time effectively...",
+      "Thanks for reaching out! I'd be happy to assist you with your question about Clockify.",
+      "Many teens have similar questions. Clockify is designed to address exactly these kinds of time management challenges.",
+      "I can definitely help with that. Let's look at how Clockify can address your needs."
     ];
     
-    return responses[Math.floor(Math.random() * responses.length)];
+    return defaultResponses[Math.floor(Math.random() * defaultResponses.length)];
   };
 
   const handleMessageSend = () => {
@@ -297,13 +372,14 @@ const FAQ = () => {
             We're here to help! Reach out to our support team for assistance.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <a 
-              href="mailto:support@clockify.com" 
+            <Button 
+              onClick={handleEmailSupport}
               className="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-white bg-clockify-blue hover:bg-clockify-darkBlue faq-expand faq-item-hover"
               style={{ animationDelay: '0.9s' }}
             >
+              <Mail className="mr-2 h-5 w-5" />
               Email Support
-            </a>
+            </Button>
             <Button 
               onClick={handleChatOpen} 
               className="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-clockify-blue bg-white hover:bg-gray-50 faq-expand faq-item-hover"
@@ -315,6 +391,71 @@ const FAQ = () => {
           </div>
         </div>
       </section>
+      
+      {/* Email Support Form */}
+      {showEmailForm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <Card className="p-6 max-w-md w-full">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold flex items-center">
+                <Mail className="mr-2 h-5 w-5 text-clockify-blue" />
+                Email Support
+              </h3>
+              <Button variant="ghost" size="sm" onClick={() => setShowEmailForm(false)} className="h-6 w-6 p-0 rounded-full">
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+            <form onSubmit={handleSubmitEmail} className="space-y-4">
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                  Your Email
+                </label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={emailInput}
+                  onChange={(e) => setEmailInput(e.target.value)}
+                  placeholder="your.email@example.com"
+                  required
+                  className="w-full"
+                />
+              </div>
+              <div>
+                <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-1">
+                  Subject
+                </label>
+                <Input
+                  id="subject"
+                  type="text"
+                  value={emailSubject}
+                  onChange={(e) => setEmailSubject(e.target.value)}
+                  placeholder="How can we help you?"
+                  required
+                  className="w-full"
+                />
+              </div>
+              <div>
+                <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">
+                  Message
+                </label>
+                <textarea
+                  id="message"
+                  value={emailBody}
+                  onChange={(e) => setEmailBody(e.target.value)}
+                  placeholder="Please describe your question or issue..."
+                  required
+                  className="w-full p-2 border rounded focus:ring-2 focus:ring-clockify-blue focus:border-transparent outline-none min-h-[120px]"
+                />
+              </div>
+              <div className="flex justify-end">
+                <Button type="submit" className="bg-clockify-blue hover:bg-clockify-darkBlue">
+                  Send Message
+                </Button>
+              </div>
+            </form>
+          </Card>
+        </div>
+      )}
       
       {/* Live Chat Modal with improved UI */}
       {showChat && (
@@ -332,7 +473,8 @@ const FAQ = () => {
             </div>
             <div className="h-60 bg-gray-50 rounded p-3 mb-4 overflow-auto">
               {messages.map((message, index) => (
-                <div key={index} className={`flex mb-2 ${message.isUser ? 'justify-end' : 'justify-start'}`}>
+                <div key={index} className={`flex mb-2 ${message.isUser ? 'justify-end' : 'justify-start'} chat-message`}
+                style={{ animationDelay: `${index * 0.1}s` }}>
                   <div 
                     className={`rounded-lg p-2 max-w-[80%] ${
                       message.isUser 
@@ -348,7 +490,7 @@ const FAQ = () => {
                 </div>
               ))}
               {isTyping && (
-                <div className="flex mb-2 justify-start">
+                <div className="flex mb-2 justify-start chat-message">
                   <div className="rounded-lg p-2 bg-gray-200 text-gray-800">
                     <div className="typing-indicator">
                       <span className="typing-indicator-dot"></span>
@@ -358,6 +500,96 @@ const FAQ = () => {
                   </div>
                 </div>
               )}
+              
+              {/* Rating Panel */}
+              {showRatingPanel && (
+                <div className="bg-white rounded-lg p-4 shadow-md border border-gray-200 mb-3 chat-message">
+                  <h4 className="font-medium text-sm mb-2 text-center">How was your experience?</h4>
+                  <div className="flex justify-center gap-3 mb-3">
+                    <div 
+                      className="rating-option flex flex-col items-center cursor-pointer"
+                      onClick={() => submitRating("Poor")}
+                    >
+                      <div className="text-gray-600 hover:text-clockify-blue mb-1">
+                        <Frown className="h-6 w-6" />
+                      </div>
+                      <span className="text-xs text-gray-500">Poor</span>
+                    </div>
+                    <div 
+                      className="rating-option flex flex-col items-center cursor-pointer"
+                      onClick={() => submitRating("Okay")}
+                    >
+                      <div className="text-gray-600 hover:text-clockify-blue mb-1">
+                        <Meh className="h-6 w-6" />
+                      </div>
+                      <span className="text-xs text-gray-500">Okay</span>
+                    </div>
+                    <div 
+                      className="rating-option flex flex-col items-center cursor-pointer"
+                      onClick={() => submitRating("Good")}
+                    >
+                      <div className="text-gray-600 hover:text-clockify-blue mb-1">
+                        <Smile className="h-6 w-6" />
+                      </div>
+                      <span className="text-xs text-gray-500">Good</span>
+                    </div>
+                    <div 
+                      className="rating-option flex flex-col items-center cursor-pointer"
+                      onClick={() => submitRating("Love it")}
+                    >
+                      <div className="text-gray-600 hover:text-clockify-blue mb-1">
+                        <Heart className="h-6 w-6" />
+                      </div>
+                      <span className="text-xs text-gray-500">Love it</span>
+                    </div>
+                  </div>
+                  <div className="flex justify-center">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="text-xs text-gray-500"
+                      onClick={() => setShowRatingPanel(false)}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </div>
+              )}
+              
+              {/* Email Transcript Form */}
+              {showTranscriptForm && (
+                <div className="bg-white rounded-lg p-4 shadow-md border border-gray-200 mb-3 chat-message">
+                  <h4 className="font-medium text-sm mb-2 text-center">Send Chat Transcript</h4>
+                  <form onSubmit={sendTranscript} className="space-y-2">
+                    <Input
+                      type="email"
+                      placeholder="Your email address"
+                      value={transcriptEmail}
+                      onChange={(e) => setTranscriptEmail(e.target.value)}
+                      required
+                      className="text-sm"
+                    />
+                    <div className="flex justify-between gap-2">
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="text-xs text-gray-500"
+                        onClick={() => setShowTranscriptForm(false)}
+                      >
+                        Cancel
+                      </Button>
+                      <Button 
+                        type="submit" 
+                        size="sm" 
+                        className="text-xs bg-clockify-blue hover:bg-clockify-darkBlue"
+                      >
+                        Send
+                      </Button>
+                    </div>
+                  </form>
+                </div>
+              )}
+              
               <div ref={messagesEndRef} />
             </div>
             <div className="flex gap-2 mb-2">
@@ -369,7 +601,7 @@ const FAQ = () => {
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyPress={handleKeyPress}
               />
-              <Button onClick={handleMessageSend} className="hover:scale-105 transition-transform bg-clockify-blue hover:bg-clockify-darkBlue">
+              <Button onClick={handleMessageSend} className="hover:scale-105 transition-transform bg-clockify-blue hover:bg-clockify-darkBlue" disabled={!inputValue.trim()}>
                 <Send className="h-4 w-4" />
               </Button>
             </div>
@@ -381,12 +613,12 @@ const FAQ = () => {
                 <ThumbsUp className="h-3 w-3 mr-1" />
                 Rate this chat
               </button>
-              <a 
-                href="mailto:support@clockify.com" 
+              <button 
+                onClick={handleTranscriptRequest}
                 className="flex items-center hover:text-clockify-blue transition-colors"
               >
                 Email transcript
-              </a>
+              </button>
             </div>
           </Card>
         </div>
