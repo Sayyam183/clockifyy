@@ -67,10 +67,10 @@ const Footer = () => {
                 <Link to="/faq" className="text-gray-300 hover:text-white">Support</Link>
               </li>
               <li>
-                <a href="#" className="text-gray-300 hover:text-white">Privacy Policy</a>
+                <Link to="/privacy-policy" className="text-gray-300 hover:text-white">Privacy Policy</Link>
               </li>
               <li>
-                <a href="#" className="text-gray-300 hover:text-white">Terms of Service</a>
+                <Link to="/terms-of-service" className="text-gray-300 hover:text-white">Terms of Service</Link>
               </li>
             </ul>
           </div>
@@ -79,19 +79,20 @@ const Footer = () => {
             <h3 className="text-sm font-semibold uppercase tracking-wider">Connect</h3>
             <ul className="mt-4 space-y-2">
               <li>
-                <a href="#" className="text-gray-300 hover:text-white">Twitter</a>
+                <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-white">Twitter</a>
               </li>
               <li>
-                <a href="#" className="text-gray-300 hover:text-white">Instagram</a>
+                <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-white">Instagram</a>
               </li>
               <li>
-                <a href="#" className="text-gray-300 hover:text-white">Facebook</a>
+                <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-white">Facebook</a>
               </li>
             </ul>
           </div>
         </div>
         <div className="mt-8 border-t border-gray-600 pt-8 flex justify-between items-center">
           <p className="text-sm text-gray-300">
+            © {new Date().getFullYear()} Clockify. All rights reserved.
           </p>
           <p className="text-sm text-gray-300">
             Designed for teenagers 13-18

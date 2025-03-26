@@ -12,6 +12,9 @@ import Reviews from "./pages/Reviews";
 import FAQ from "./pages/FAQ";
 import LearnMore from "./pages/LearnMore";
 import NotFound from "./pages/NotFound";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsOfService from "./pages/TermsOfService";
+import FloatingChatButton from "./components/FloatingChatButton";
 
 // Create a component to handle route changes
 const RouteChangeHandler = () => {
@@ -44,8 +47,11 @@ const App = () => (
           <Route path="/reviews" element={<Reviews />} />
           <Route path="/faq" element={<FAQ />} />
           <Route path="/learn-more" element={<LearnMore />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/terms-of-service" element={<TermsOfService />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
+        <FloatingChatButton />
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

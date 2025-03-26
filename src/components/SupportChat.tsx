@@ -1,11 +1,12 @@
 
 import { useState, useRef, useEffect } from "react";
-import { MessageCircle, Send, X, ThumbsUp, Star, Smile, Meh, Frown, Heart } from "lucide-react";
+import { MessageCircle, Send, X, ThumbsUp, Star, Smile, Meh, Frown, Heart, User, Bot } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 
 interface ChatMessage {
   text: string;
@@ -25,6 +26,7 @@ const SupportChat = ({ isOpen, onClose }: SupportChatProps) => {
   const [inputValue, setInputValue] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const [conversationContext, setConversationContext] = useState({
     userName: "",
     topicDiscussed: "",
@@ -33,6 +35,7 @@ const SupportChat = ({ isOpen, onClose }: SupportChatProps) => {
   const [showRatingPanel, setShowRatingPanel] = useState(false);
   const [showTranscriptForm, setShowTranscriptForm] = useState(false);
   const [transcriptEmail, setTranscriptEmail] = useState("");
+  const [selectedRating, setSelectedRating] = useState("");
   const { toast } = useToast();
 
   // Auto-scroll to bottom of chat
@@ -40,18 +43,29 @@ const SupportChat = ({ isOpen, onClose }: SupportChatProps) => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, showRatingPanel, showTranscriptForm]);
 
+  // Focus input when chat opens
+  useEffect(() => {
+    if (isOpen && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [isOpen]);
+
   const handleFeedback = () => {
     setShowRatingPanel(true);
     setShowTranscriptForm(false);
   };
 
-  const submitRating = (rating: string, feedback: string = "") => {
+  const submitRating = (rating: string) => {
+    setSelectedRating(rating);
     // Here you could implement API calls to save the rating
     toast({
       title: "Thank you for your feedback!",
       description: `You rated this conversation as "${rating}". We'll use this to improve.`,
     });
-    setShowRatingPanel(false);
+    setTimeout(() => {
+      setShowRatingPanel(false);
+      setSelectedRating("");
+    }, 1500);
   };
   
   const handleTranscriptRequest = () => {
@@ -248,7 +262,7 @@ const SupportChat = ({ isOpen, onClose }: SupportChatProps) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed bottom-4 right-4 w-80 z-50 scale-in">
+    <div className="fixed bottom-4 right-4 w-80 md:w-96 z-50 scale-in">
       <style dangerouslySetInnerHTML={{ __html: `
         .typing-indicator {
           display: flex;
@@ -326,18 +340,23 @@ const SupportChat = ({ isOpen, onClose }: SupportChatProps) => {
         </div>
         
         {/* Chat messages container */}
-        <div className="h-60 bg-gray-50 rounded p-3 mb-4 overflow-auto">
+        <div className="h-96 bg-gray-50 rounded p-3 mb-4 overflow-auto">
           {messages.map((message, index) => (
             <div 
               key={index} 
-              className={`flex mb-2 ${message.isUser ? 'justify-end' : 'justify-start'} chat-message`}
+              className={`flex mb-3 ${message.isUser ? 'justify-end' : 'justify-start'} chat-message`}
               style={{ animationDelay: `${index * 0.1}s` }}
             >
+              {!message.isUser && (
+                <div className="h-8 w-8 rounded-full bg-purple-100 flex items-center justify-center mr-2 flex-shrink-0">
+                  <Bot className="h-4 w-4 text-clockify-blue" />
+                </div>
+              )}
               <div 
-                className={`rounded-lg p-2 max-w-[80%] ${
+                className={`rounded-lg p-3 max-w-[80%] ${
                   message.isUser 
                     ? 'bg-clockify-blue text-white' 
-                    : 'bg-gray-200 text-gray-800'
+                    : 'bg-white border text-gray-800'
                 }`}
               >
                 {message.text}
@@ -345,11 +364,19 @@ const SupportChat = ({ isOpen, onClose }: SupportChatProps) => {
                   {message.timestamp.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                 </div>
               </div>
+              {message.isUser && (
+                <div className="h-8 w-8 rounded-full bg-clockify-blue flex items-center justify-center ml-2 flex-shrink-0">
+                  <User className="h-4 w-4 text-white" />
+                </div>
+              )}
             </div>
           ))}
           {isTyping && (
-            <div className="flex mb-2 justify-start chat-message">
-              <div className="rounded-lg p-2 bg-gray-200 text-gray-800">
+            <div className="flex mb-3 justify-start chat-message">
+              <div className="h-8 w-8 rounded-full bg-purple-100 flex items-center justify-center mr-2">
+                <Bot className="h-4 w-4 text-clockify-blue" />
+              </div>
+              <div className="rounded-lg p-3 bg-white border text-gray-800">
                 <div className="typing-indicator">
                   <span className="typing-indicator-dot"></span>
                   <span className="typing-indicator-dot"></span>
@@ -363,11 +390,31 @@ const SupportChat = ({ isOpen, onClose }: SupportChatProps) => {
           {showRatingPanel && (
             <div className="bg-white rounded-lg p-4 shadow-md border border-gray-200 mb-3 chat-message">
               <h4 className="font-medium text-sm mb-2 text-center">How was your experience?</h4>
-              <div className="flex justify-center gap-3 mb-3">
-                <RatingOption icon={<Frown className="h-6 w-6" />} onClick={() => submitRating("Poor")} label="Poor" />
-                <RatingOption icon={<Meh className="h-6 w-6" />} onClick={() => submitRating("Okay")} label="Okay" />
-                <RatingOption icon={<Smile className="h-6 w-6" />} onClick={() => submitRating("Good")} label="Good" />
-                <RatingOption icon={<Heart className="h-6 w-6" />} onClick={() => submitRating("Love it")} label="Love it" />
+              <div className="flex justify-center gap-4 mb-3">
+                <RatingOption 
+                  icon={<Frown className="h-6 w-6" />} 
+                  onClick={() => submitRating("Poor")} 
+                  label="Poor" 
+                  isSelected={selectedRating === "Poor"}
+                />
+                <RatingOption 
+                  icon={<Meh className="h-6 w-6" />} 
+                  onClick={() => submitRating("Okay")} 
+                  label="Okay"
+                  isSelected={selectedRating === "Okay"}
+                />
+                <RatingOption 
+                  icon={<Smile className="h-6 w-6" />} 
+                  onClick={() => submitRating("Good")} 
+                  label="Good"
+                  isSelected={selectedRating === "Good"}
+                />
+                <RatingOption 
+                  icon={<Heart className="h-6 w-6" />} 
+                  onClick={() => submitRating("Love it")} 
+                  label="Love it"
+                  isSelected={selectedRating === "Love it"}
+                />
               </div>
               <div className="flex justify-center">
                 <Button 
@@ -421,13 +468,14 @@ const SupportChat = ({ isOpen, onClose }: SupportChatProps) => {
         
         {/* Message input */}
         <div className="flex gap-2 mb-2">
-          <input 
+          <Input 
             type="text" 
             placeholder="Type your message..." 
             className="flex-grow p-2 border rounded focus:ring-2 focus:ring-clockify-blue focus:border-transparent outline-none"
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyPress={handleKeyPress}
+            ref={inputRef}
           />
           <Button 
             onClick={handleMessageSend} 
@@ -464,15 +512,22 @@ interface RatingOptionProps {
   icon: React.ReactNode;
   onClick: () => void;
   label: string;
+  isSelected: boolean;
 }
 
-const RatingOption = ({ icon, onClick, label }: RatingOptionProps) => {
+const RatingOption = ({ icon, onClick, label, isSelected }: RatingOptionProps) => {
   return (
     <div 
-      className="rating-option flex flex-col items-center cursor-pointer" 
+      className={cn(
+        "rating-option flex flex-col items-center cursor-pointer", 
+        isSelected && "selected"
+      )}
       onClick={onClick}
     >
-      <div className="text-gray-600 hover:text-clockify-blue mb-1">
+      <div className={cn(
+        "text-gray-600 hover:text-clockify-blue mb-1",
+        isSelected && "text-clockify-blue"
+      )}>
         {icon}
       </div>
       <span className="text-xs text-gray-500">{label}</span>
