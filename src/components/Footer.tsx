@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Clock, MessageCircle, Mail } from "lucide-react";
@@ -92,15 +91,11 @@ const Footer = () => {
         </div>
         <div className="mt-8 border-t border-gray-600 pt-8 flex justify-between items-center">
           <p className="text-sm text-gray-300">
-            © {new Date().getFullYear()} Clockify. All rights reserved.
-          </p>
-          <p className="text-sm text-gray-300">
             Designed for teenagers 13-18
           </p>
         </div>
       </div>
       
-      {/* Render the support chat component */}
       <SupportChat isOpen={showChat} onClose={handleChatClose} />
     </footer>
   );
