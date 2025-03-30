@@ -6,8 +6,6 @@ import HeroSection from "@/components/home/HeroSection";
 import FeaturesSection from "@/components/home/FeaturesSection";
 import StatsSection from "@/components/home/StatsSection";
 import CTASection from "@/components/home/CTASection";
-import TestimonialsSection from "@/components/home/TestimonialsSection";
-import HowItWorksSection from "@/components/home/HowItWorksSection";
 import SupportChat from "@/components/SupportChat";
 import { useToast } from "@/hooks/use-toast";
 
@@ -51,9 +49,7 @@ const Index = () => {
       <Navbar />
       <main className="flex-grow">
         <HeroSection />
-        <HowItWorksSection />
         <FeaturesSection />
-        <TestimonialsSection />
         <StatsSection />
         <CTASection />
       </main>
